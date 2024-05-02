@@ -1,9 +1,9 @@
 package com.sotnikov.ListToDoBackend.security;
 
+import com.sotnikov.ListToDoBackend.models.User;
 import lombok.Getter;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
-import ru.codecrafters.AuthenticationService.models.User;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -29,7 +29,7 @@ public class UserDetailsImpl implements UserDetails {
 
     @Override
     public String getUsername() {
-        return user.getPhoneNumber();
+        return user.getLogin();
     }
 
     @Override

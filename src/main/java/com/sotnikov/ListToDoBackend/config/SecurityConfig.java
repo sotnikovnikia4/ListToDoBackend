@@ -31,15 +31,10 @@ public class SecurityConfig{
                         request.requestMatchers(
                                         "/auth/login",
                                         "/auth/registration",
-                                        "/error",
-                                        "/api-docs"
+                                        "/error"
                                 )
                                 .permitAll()
-                                .requestMatchers(
-                                        "/accounts/*",
-                                        "/users/*"
-                                ).authenticated()
-                                .anyRequest().permitAll()
+                                .anyRequest().authenticated()
                 )
                 .formLogin(AbstractHttpConfigurer::disable)
                 .sessionManagement(m ->

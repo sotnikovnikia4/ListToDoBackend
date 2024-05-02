@@ -1,6 +1,8 @@
 package com.sotnikov.ListToDoBackend.config;
 
 import com.auth0.jwt.exceptions.JWTVerificationException;
+import com.sotnikov.ListToDoBackend.security.JWTUtil;
+import com.sotnikov.ListToDoBackend.services.UserDetailsServiceImpl;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -11,8 +13,6 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
-import ru.codecrafters.AuthenticationService.security.JWTUtil;
-import ru.codecrafters.AuthenticationService.services.UserDetailsServiceImpl;
 
 import java.io.IOException;
 
