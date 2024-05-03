@@ -5,6 +5,7 @@ import com.auth0.jwt.JWTVerifier;
 import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.exceptions.JWTVerificationException;
 import com.auth0.jwt.interfaces.DecodedJWT;
+import com.sotnikov.ListToDoBackend.models.User;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.stereotype.Component;
@@ -23,13 +24,13 @@ public class JWTUtil {
     private int expirationDays;
     private final String subject = "User details";
 
-    public String generateToken(String id, String login){
+    public String generateToken(User user){
         Date expirationDate = Date.from(ZonedDateTime.now().plusDays(expirationDays).toInstant());
 
         return JWT.create()
                 .withSubject(subject)
-                .withClaim("id", id)
-                .withClaim("login", login)
+                .withClaim("id", user.getId().toString())
+                .withClaim("login", user.getLogin())
                 .withIssuer(issuer)
                 .withExpiresAt(expirationDate)
                 .sign(Algorithm.HMAC256(secret));

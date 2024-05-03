@@ -1,10 +1,17 @@
 package com.sotnikov.ListToDoBackend.controllers;
 
+import com.sotnikov.ListToDoBackend.dto.LoginDTO;
 import com.sotnikov.ListToDoBackend.dto.RegistrationDTO;
 import com.sotnikov.ListToDoBackend.models.User;
+import com.sotnikov.ListToDoBackend.security.AuthManagerImpl;
+import com.sotnikov.ListToDoBackend.security.JWTUtil;
+import com.sotnikov.ListToDoBackend.services.RegistrationService;
+import com.sotnikov.ListToDoBackend.util.ErrorMessageMaker;
+import com.sotnikov.ListToDoBackend.util.LoginValidator;
 import com.sotnikov.ListToDoBackend.util.RegistrationValidator;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
@@ -20,9 +27,13 @@ import java.util.Map;
 @RequiredArgsConstructor
 public class AuthController {
 
-    private RegistrationValidator registrationValidator;
+    private final RegistrationValidator registrationValidator;
+    private final RegistrationService registrationService;
+    private final JWTUtil jwtUtil;
 
-    private ModelMapper modelMapper;
+    private final AuthManagerImpl authManager;
+
+    private final ModelMapper modelMapper;
 
     @PostMapping("/registration")
     public ResponseEntity<Map<String,Object>> register(@RequestBody RegistrationDTO registrationDTO,
@@ -32,20 +43,39 @@ public class AuthController {
         registrationValidator.validate(user, bindingResult);
 
         if(bindingResult.hasErrors()){
-
+            throw new
         }
 
+        registrationService.register(user);
 
-        return null;
+        String token = jwtUtil.generateToken(user);
+
+        return new ResponseEntity<>(
+                Map.of("token", token),
+                HttpStatus.OK
+        );
     }
 
     @PostMapping("/login")
-    public ResponseEntity<Object> login(){
+    public ResponseEntity<Map<String,Object>> login(@RequestBody LoginDTO loginDTO, BindingResult bindingResult){
+        User user = convertToUser(loginDTO);
+        if(bindingResult.hasErrors()){
+            return new ResponseEntity<>(
+                    Map.of("errors", ErrorMessageMaker.formErrorMap(bindingResult)),
+                    HttpStatus.BAD_REQUEST
+            );
+        }
+
+        authManager.authenticate();
 
         return null;
     }
 
     private User convertToUser(RegistrationDTO registrationDTO){
         return modelMapper.map(registrationDTO, User.class);
+    }
+
+    private User convertToUser(LoginDTO loginDTO){
+        return modelMapper.map(loginDTO, User.class);
     }
 }
