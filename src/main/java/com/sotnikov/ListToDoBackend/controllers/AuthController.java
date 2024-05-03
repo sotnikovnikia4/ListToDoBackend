@@ -10,12 +10,14 @@ import com.sotnikov.ListToDoBackend.security.UserDetailsImpl;
 import com.sotnikov.ListToDoBackend.services.RegistrationService;
 import com.sotnikov.ListToDoBackend.util.ErrorMessageMaker;
 import com.sotnikov.ListToDoBackend.util.RegistrationValidator;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -38,7 +40,7 @@ public class AuthController {
     private final ModelMapper modelMapper;
 
     @PostMapping("/registration")
-    public ResponseEntity<Map<String,Object>> register(@RequestBody RegistrationDTO registrationDTO,
+    public ResponseEntity<Map<String,Object>> register(@RequestBody @Valid  RegistrationDTO registrationDTO,
                                                        BindingResult bindingResult){
 
         User user = convertToUser(registrationDTO);
@@ -59,13 +61,14 @@ public class AuthController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<Map<String,Object>> login(@RequestBody AuthenticationDTO authenticationDTO, BindingResult bindingResult){
+    public ResponseEntity<Map<String,Object>> login(@Valid @RequestBody AuthenticationDTO authenticationDTO, BindingResult bindingResult){
         UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
                 authenticationDTO.getLogin(),
                 authenticationDTO.getPassword()
         );
 
-        UserDetailsImpl userDetails = (UserDetailsImpl) authManager.authenticate(authToken).getPrincipal();
+        Authentication authentication = authManager.authenticate(authToken);
+        UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
 
         String token = jwtUtil.generateToken(userDetails.getUser());
 

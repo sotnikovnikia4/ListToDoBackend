@@ -6,6 +6,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
+
 @Service
 @RequiredArgsConstructor
 public class RegistrationService {
@@ -13,10 +15,14 @@ public class RegistrationService {
     private final UsersRepository usersRepository;
     private final PasswordEncoder passwordEncoder;
 
-    //@Transactional
     public void register(User user){
-        user.setPassword(passwordEncoder.encode(user.getPassword()));
+        enrich(user);
         usersRepository.save(user);
+    }
 
+    private void enrich(User user){
+        String encodedPassword = passwordEncoder.encode(user.getPassword());
+        user.setPassword(encodedPassword);
+        user.setRegisteredAt(LocalDateTime.now());
     }
 }

@@ -1,6 +1,7 @@
 package com.sotnikov.ListToDoBackend.models;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotBlank;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -21,12 +22,15 @@ public class User {
     private UUID id;
 
     @Column(name = "login")
+    @NotBlank
     private String login;
 
     @Column(name = "password")
+    @NotBlank
     private String password;
 
     @Column(name = "name")
+    @NotBlank
     private String name;
 
     @Column(name = "registered_at")
