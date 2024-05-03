@@ -1,7 +1,7 @@
 package com.sotnikov.ListToDoBackend.controllers;
 
 import com.sotnikov.ListToDoBackend.dto.AuthenticationDTO;
-import com.sotnikov.ListToDoBackend.dto.RegistrationDTO;
+import com.sotnikov.ListToDoBackend.dto.UserDTO;
 import com.sotnikov.ListToDoBackend.exceptions.NotRegisteredException;
 import com.sotnikov.ListToDoBackend.models.User;
 import com.sotnikov.ListToDoBackend.security.AuthManagerImpl;
@@ -40,14 +40,14 @@ public class AuthController {
     private final ModelMapper modelMapper;
 
     @PostMapping("/registration")
-    public ResponseEntity<Map<String,Object>> register(@RequestBody @Valid  RegistrationDTO registrationDTO,
+    public ResponseEntity<Map<String,Object>> register(@RequestBody @Valid UserDTO userDTO,
                                                        BindingResult bindingResult){
 
-        User user = convertToUser(registrationDTO);
+        User user = convertToUser(userDTO);
         registrationValidator.validate(user, bindingResult);
 
         if(bindingResult.hasErrors()){
-            throw new NotRegisteredException(ErrorMessageMaker.formErrorMap(bindingResult).toString());
+            throw new NotRegisteredException("User is not registered" ,ErrorMessageMaker.formErrorMap(bindingResult));
         }
 
         registrationService.register(user);
@@ -75,7 +75,7 @@ public class AuthController {
         return new ResponseEntity<>(Map.of("token", token), HttpStatus.OK);
     }
 
-    private User convertToUser(RegistrationDTO registrationDTO){
-        return modelMapper.map(registrationDTO, User.class);
+    private User convertToUser(UserDTO userDTO){
+        return modelMapper.map(userDTO, User.class);
     }
 }

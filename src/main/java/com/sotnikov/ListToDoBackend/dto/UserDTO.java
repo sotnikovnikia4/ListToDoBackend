@@ -10,7 +10,7 @@ import lombok.Setter;
 @Getter
 @Setter
 @NoArgsConstructor
-public class RegistrationDTO {
+public class UserDTO {
 
     @NotBlank
     @JsonProperty("login")

@@ -4,11 +4,11 @@ import lombok.Getter;
 
 import java.util.Map;
 
-public class NotRegisteredException extends RuntimeException implements ErrorsMap{
+public class UserDataNotChangedException extends RuntimeException implements ErrorsMap{
     @Getter
     private final Map<String, String> map;
 
-    public NotRegisteredException(String message, Map<String, String> map){
+    public UserDataNotChangedException(String message, Map<String, String> map){
         super(message);
         this.map = map;
     }

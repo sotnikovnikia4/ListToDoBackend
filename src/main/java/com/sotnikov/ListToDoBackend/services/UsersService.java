@@ -17,4 +17,10 @@ public class UsersService {
     public Optional<User> findOne(String login){
         return usersRepository.findByLogin(login);
     }
+
+    public void update(User userToUpdate, User updatedUser){
+        userToUpdate.setName(updatedUser.getName());
+        userToUpdate.setPassword(updatedUser.getPassword());
+        userToUpdate.setLogin(updatedUser.getLogin());
+    }
 }
