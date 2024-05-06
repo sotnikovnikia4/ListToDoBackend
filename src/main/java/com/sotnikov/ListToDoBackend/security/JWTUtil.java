@@ -17,7 +17,7 @@ import java.util.Date;
 public class JWTUtil {
 
     @Value("${jwt_secret}")
-    private String secret;
+    private String secretWord;
     @Value("${token_issuer}")
     private String issuer;
     @Value("${jwt_days_until_expiration}")
@@ -29,15 +29,14 @@ public class JWTUtil {
 
         return JWT.create()
                 .withSubject(subject)
-                .withClaim("id", user.getId().toString())
                 .withClaim("login", user.getLogin())
                 .withIssuer(issuer)
                 .withExpiresAt(expirationDate)
-                .sign(Algorithm.HMAC256(secret));
+                .sign(Algorithm.HMAC256(secretWord));
     }
 
     public String validateTokenAndRetrieveClaim(String token) throws JWTVerificationException {
-        JWTVerifier verifier = JWT.require(Algorithm.HMAC256(secret))
+        JWTVerifier verifier = JWT.require(Algorithm.HMAC256(secretWord))
                 .withSubject(subject)
                 .withIssuer(issuer)
                 .build();

@@ -4,17 +4,9 @@ import lombok.Getter;
 
 import java.util.Map;
 
-public class NotRegisteredException extends RuntimeException implements ErrorsMap{
-    @Getter
-    private final Map<String, String> map;
+public class NotRegisteredException extends RuntimeException{
 
-    public NotRegisteredException(String message, Map<String, String> map){
+    public NotRegisteredException(String message){
         super(message);
-        this.map = map;
-    }
-
-    @Override
-    public Map<String, String> get() {
-        return this.map;
     }
 }

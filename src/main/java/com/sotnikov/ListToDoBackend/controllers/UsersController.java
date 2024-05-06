@@ -29,7 +29,7 @@ public class UsersController {
         User newUserData = convertToUser(userDTO);
         registrationValidator.validate(newUserData, bindingResult);
         if(bindingResult.hasErrors()){
-            throw new UserDataNotChangedException("User data is not changed", ErrorMessageMaker.formErrorMap(bindingResult));
+            throw new UserDataNotChangedException("User data is not changed, invalid data");
         }
 
         User currentUser = ((UserDetailsImpl)SecurityContextHolder.getContext().getAuthentication().getPrincipal()).getUser();

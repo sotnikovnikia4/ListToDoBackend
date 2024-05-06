@@ -47,7 +47,7 @@ public class AuthController {
         registrationValidator.validate(user, bindingResult);
 
         if(bindingResult.hasErrors()){
-            throw new NotRegisteredException("User is not registered" ,ErrorMessageMaker.formErrorMap(bindingResult));
+            throw new NotRegisteredException("User is not registered, invalid data");
         }
 
         registrationService.register(user);
