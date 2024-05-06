@@ -1,0 +1,9 @@
+db.tasks.insertOne(
+{
+	name: "Name",
+	description: "description",
+	userId: "c5fcfb13-2251-4d3d-a237-6e86d075fe8c",
+	level: 1,
+	tasks:[]
+}
+)

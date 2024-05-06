@@ -14,6 +14,10 @@ public class TasksService {
     private final TasksRepository tasksRepository;
 
     public List<Task> getTasks(UUID userId){
-        return tasksRepository.findAllByUserId(userId);
+        return tasksRepository.findByUserId(userId.toString());
+    }
+
+    public void save(Task task){
+        tasksRepository.insert(task);
     }
 }
