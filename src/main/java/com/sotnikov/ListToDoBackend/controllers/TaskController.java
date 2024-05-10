@@ -1,26 +1,22 @@
 package com.sotnikov.ListToDoBackend.controllers;
 
-import com.auth0.jwt.exceptions.JWTVerificationException;
 import com.sotnikov.ListToDoBackend.dto.CreationTaskDTO;
-import com.sotnikov.ListToDoBackend.exceptions.TaskNotCreatedException;
+import com.sotnikov.ListToDoBackend.dto.TaskDTO;
+import com.sotnikov.ListToDoBackend.exceptions.TaskException;
 import com.sotnikov.ListToDoBackend.models.Task;
 import com.sotnikov.ListToDoBackend.models.User;
-import com.sotnikov.ListToDoBackend.repotitories.TasksRepository;
 import com.sotnikov.ListToDoBackend.security.UserDetailsImpl;
 import com.sotnikov.ListToDoBackend.services.TasksService;
+import com.sotnikov.ListToDoBackend.util.ChangingTaskValidator;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
-import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.stereotype.Controller;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.Map;
 
 @RestController
 @RequestMapping("/tasks")
@@ -30,18 +26,21 @@ public class TaskController {
     private final TasksService tasksService;
     private final ModelMapper modelMapper;
 
+    private final ChangingTaskValidator changingTaskValidator;
+
     @GetMapping
-    public List<Task> getTasks(){
+    @ResponseStatus(HttpStatus.OK)
+    public List<TaskDTO> getTasks(){
         User user = ((UserDetailsImpl)SecurityContextHolder.getContext().getAuthentication().getPrincipal()).getUser();
 
-        return tasksService.getTasks(user.getId());
+        return tasksService.getTasks(user.getId()).stream().map(this::convertToTaskDTO).toList();
     }
 
     @PostMapping("/add")
     public HttpStatus saveTask(@RequestBody @Valid CreationTaskDTO creationTaskDTO, BindingResult bindingResult){
 
         if(bindingResult.hasErrors()){
-            throw new TaskNotCreatedException("Task is not created");
+            throw new TaskException("Task is not created");
         }
 
         Task task = convertToTask(creationTaskDTO);
@@ -51,7 +50,28 @@ public class TaskController {
         return HttpStatus.CREATED;
     }
 
+    @PatchMapping("/edit")
+    public void editTask(@RequestBody @Valid TaskDTO taskDTO, BindingResult bindingResult){
+        Task updatedTask = convertToTask(taskDTO);
+
+        changingTaskValidator.validate(updatedTask, bindingResult);
+
+        if(bindingResult.hasErrors()){
+            throw new TaskException("Data of task is not changed");
+        }
+
+        tasksService.update(updatedTask);
+    }
+
     private Task convertToTask(CreationTaskDTO creationTaskDTO){
         return modelMapper.map(creationTaskDTO, Task.class);
+    }
+
+    private Task convertToTask(TaskDTO taskDTO){
+        return modelMapper.map(taskDTO, Task.class);
+    }
+
+    private TaskDTO convertToTaskDTO(Task task){
+        return modelMapper.map(task, TaskDTO.class);
     }
 }

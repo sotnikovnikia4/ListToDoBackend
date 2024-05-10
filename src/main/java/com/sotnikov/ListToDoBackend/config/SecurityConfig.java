@@ -34,7 +34,8 @@ public class SecurityConfig{
                                 )
                                 .permitAll()
                                 .requestMatchers(
-                                        "/tasks/**"
+                                        "/tasks/**",
+                                        "/users/**"
                                 ).authenticated()
                                 .anyRequest().permitAll()
                 )

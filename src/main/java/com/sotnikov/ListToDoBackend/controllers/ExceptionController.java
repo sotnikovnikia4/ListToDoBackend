@@ -3,14 +3,13 @@ package com.sotnikov.ListToDoBackend.controllers;
 import com.auth0.jwt.exceptions.JWTVerificationException;
 import com.sotnikov.ListToDoBackend.exceptions.ExceptionMessage;
 import com.sotnikov.ListToDoBackend.exceptions.NotRegisteredException;
-import com.sotnikov.ListToDoBackend.exceptions.TaskNotCreatedException;
+import com.sotnikov.ListToDoBackend.exceptions.TaskException;
 import com.sotnikov.ListToDoBackend.exceptions.UserDataNotChangedException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
-import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 import java.nio.file.AccessDeniedException;
@@ -60,8 +59,8 @@ public class ExceptionController {
         return new ResponseEntity<>(response, HttpStatus.FORBIDDEN);
     }
 
-    @ExceptionHandler(TaskNotCreatedException.class)
-    public ResponseEntity<ExceptionMessage> handleException(TaskNotCreatedException e){
+    @ExceptionHandler(TaskException.class)
+    public ResponseEntity<ExceptionMessage> handleException(TaskException e){
         ExceptionMessage message = new ExceptionMessage(e.getMessage(), new Date());
         return new ResponseEntity<>(message, HttpStatus.BAD_REQUEST);
     }

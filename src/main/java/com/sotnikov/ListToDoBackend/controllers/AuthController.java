@@ -8,7 +8,6 @@ import com.sotnikov.ListToDoBackend.security.AuthManagerImpl;
 import com.sotnikov.ListToDoBackend.security.JWTUtil;
 import com.sotnikov.ListToDoBackend.security.UserDetailsImpl;
 import com.sotnikov.ListToDoBackend.services.RegistrationService;
-import com.sotnikov.ListToDoBackend.util.ErrorMessageMaker;
 import com.sotnikov.ListToDoBackend.util.RegistrationValidator;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;

@@ -12,4 +12,6 @@ import java.util.UUID;
 public interface TasksRepository extends MongoRepository<Task, ObjectId> {
     //@Query("find({userId: '?0'})")
     List<Task> findByUserId(String userId);
+
+    void deleteAllByUserId(String userId);
 }
