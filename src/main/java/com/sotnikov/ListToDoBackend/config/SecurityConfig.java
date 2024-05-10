@@ -33,7 +33,10 @@ public class SecurityConfig{
                                         "/error"
                                 )
                                 .permitAll()
-                                .anyRequest().authenticated()
+                                .requestMatchers(
+                                        "/tasks/**"
+                                ).authenticated()
+                                .anyRequest().permitAll()
                 )
                 .formLogin(AbstractHttpConfigurer::disable)
                 .sessionManagement(m ->

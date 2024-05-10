@@ -9,6 +9,7 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -16,6 +17,7 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 import org.springframework.web.servlet.HandlerExceptionResolver;
+import org.springframework.web.servlet.mvc.support.DefaultHandlerExceptionResolver;
 
 import java.io.IOException;
 
@@ -29,21 +31,21 @@ public class JWTFilter extends OncePerRequestFilter {
 
     private final ExceptionController exceptionController;
 
-    private String jwt;
+    private String token;
     private HttpServletRequest request;
     private HttpServletResponse response;
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
         String authHeader = request.getHeader("Authorization");
+
         this.request = request;
         this.response = response;
 
         if (headerIsCorrect(authHeader)) {
-            jwt = authHeader.substring(7);
-            checkJWTAndSetAuthenticationIfNotBlank();
+            this.token = authHeader.substring(7);
+            checkJWTAndSetAuthentication();
         }
-
         filterChain.doFilter(request, response);
     }
 
@@ -51,32 +53,29 @@ public class JWTFilter extends OncePerRequestFilter {
         return authHeader != null && !authHeader.isBlank() && authHeader.startsWith("Bearer ");
     }
 
-    private void checkJWTAndSetAuthenticationIfNotBlank(){
-        if(!jwt.isBlank()){
+    private void checkJWTAndSetAuthentication(){
+        if (!token.isBlank()) {
             trySetAuthentication();
         }
     }
 
     private void trySetAuthentication(){
-        try{
+        try {
             setAuthentication();
-        }
-        catch (JWTVerificationException | UsernameNotFoundException e){
-            handlerExceptionResolver.resolveException(request, response, null, e);
+        } catch (JWTVerificationException | UsernameNotFoundException e) {
+            handlerExceptionResolver.resolveException(request, response, exceptionController, e);
         }
     }
 
     private void setAuthentication(){
-        String username = jwtUtil.validateTokenAndRetrieveClaim(jwt);
+        String username = jwtUtil.validateTokenAndRetrieveClaim(token);
         UserDetails userDetails = userDetailsService.loadUserByUsername(username);
 
-        UsernamePasswordAuthenticationToken authToken =
-                new UsernamePasswordAuthenticationToken(userDetails,
-                        userDetails.getPassword(),
-                        userDetails.getAuthorities());
-
+        UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
+                userDetails, userDetails.getPassword(), userDetails.getAuthorities());
         if (SecurityContextHolder.getContext().getAuthentication() == null) {
             SecurityContextHolder.getContext().setAuthentication(authToken);
         }
     }
+
 }

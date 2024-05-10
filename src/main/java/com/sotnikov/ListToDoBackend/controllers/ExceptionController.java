@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
+import java.nio.file.AccessDeniedException;
 import java.util.Date;
 
 @RestControllerAdvice
@@ -45,9 +46,20 @@ public class ExceptionController {
     }
 
     @ExceptionHandler(JWTVerificationException.class)
-    @ResponseStatus(HttpStatus.FORBIDDEN)
     public ResponseEntity<ExceptionMessage> handleException(JWTVerificationException e){
-        ExceptionMessage message = new ExceptionMessage(e.getMessage(), new Date());
-        return new ResponseEntity<>(message, HttpStatus.BAD_REQUEST);
+        ExceptionMessage response = new ExceptionMessage(
+                e.getMessage(),
+                new Date()
+        );
+        return new ResponseEntity<>(response, HttpStatus.FORBIDDEN);
+    }
+
+    @ExceptionHandler(AccessDeniedException.class)
+    public ResponseEntity<ExceptionMessage> handleException(AccessDeniedException e){
+        ExceptionMessage response = new ExceptionMessage(
+                e.getMessage(),
+                new Date()
+        );
+        return new ResponseEntity<>(response, HttpStatus.FORBIDDEN);
     }
 }
