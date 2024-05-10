@@ -33,8 +33,7 @@ public class ChangingTaskValidator implements Validator {
         if(taskWithSameId.isEmpty()){
             errors.rejectValue("id", "", "The task does not exist");
         }
-
-        if(!taskWithSameId.get().getUserId().equals(currentUser.getId().toString()) ){
+        else if(!Objects.equals(taskWithSameId.get().getUserId(), currentUser.getId())){
             errors.rejectValue("id", "", "The task does not belong the user");
         }
     }

@@ -16,17 +16,16 @@ import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
-public class TasksService {//TODO
-    private static final int MAX_LEVEL = 5;
+public class TasksService {
 
     private final TasksRepository tasksRepository;
 
     public List<Task> getTasks(UUID userId){
-        return tasksRepository.findByUserId(userId.toString());
+        return tasksRepository.findByUserId(userId);
     }
 
     public Optional<Task> getOne(String id){
-        return tasksRepository.findById(new ObjectId(id));
+        return tasksRepository.findById(convertToObjectId(id));
     }
 
     public void save(Task task){
@@ -36,15 +35,23 @@ public class TasksService {//TODO
     }
 
     public void update(Task updatedTask){
-        Optional<Task> taskToUpdate = (tasksRepository.findById(new ObjectId(updatedTask.getId())));
+        Optional<Task> taskWithSameId = getOne(updatedTask.getId());
 
-        if(taskToUpdate.isPresent()){
-            taskToUpdate.get().setName(updatedTask.getName());
-            taskToUpdate.get().setDeadline(updatedTask.getDeadline());
-            taskToUpdate.get().setCompleted(updatedTask.isCompleted());
-            taskToUpdate.get().setDescription(updatedTask.getDescription());
-            taskToUpdate.get().setPriority(updatedTask.getPriority());
-            taskToUpdate.get().setSubtasks(updatedTask.getSubtasks());
+        if(taskWithSameId.isPresent()){
+            enrich(updatedTask);
+            tasksRepository.save(updatedTask);
+        }
+        else{
+            throw new TaskException("The task does not exist");
+        }
+
+    }
+
+    public void delete(String id){
+        Optional<Task> taskWithSameId = getOne(id);
+
+        if(taskWithSameId.isPresent()){
+            tasksRepository.delete(taskWithSameId.get());
         }
         else{
             throw new TaskException("The task does not exist");
@@ -55,6 +62,15 @@ public class TasksService {//TODO
     private void enrich(Task task){
         User user = ((UserDetailsImpl) SecurityContextHolder.getContext().getAuthentication().getPrincipal()).getUser();
 
-        task.setUserId(user.getId().toString());
+        task.setUserId(user.getId());
+    }
+
+    private ObjectId convertToObjectId(String id){
+        try{
+            return new ObjectId(id);
+        }
+        catch(IllegalArgumentException e){
+            throw new TaskException("A task with the id does not exist");
+        }
     }
 }

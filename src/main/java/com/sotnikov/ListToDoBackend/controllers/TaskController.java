@@ -63,6 +63,11 @@ public class TaskController {
         tasksService.update(updatedTask);
     }
 
+    @DeleteMapping("/delete")
+    public void deleteTask(@RequestParam(name = "id") String id){
+        tasksService.delete(id);
+    }
+
     private Task convertToTask(CreationTaskDTO creationTaskDTO){
         return modelMapper.map(creationTaskDTO, Task.class);
     }

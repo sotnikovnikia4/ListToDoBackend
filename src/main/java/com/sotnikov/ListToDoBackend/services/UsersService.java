@@ -40,7 +40,7 @@ public class UsersService {
 
     @Transactional
     public void delete(User user){
-        tasksRepository.deleteAllByUserId(user.getId().toString());
+        tasksRepository.deleteAllByUserId(user.getId());
 
         usersRepository.delete(user);
     }
