@@ -34,8 +34,8 @@ public class ChangingTaskValidator implements Validator {
             errors.rejectValue("id", "", "The task does not exist");
         }
 
-        if(!Objects.equals(task.getUserId(), currentUser.getId().toString())){
-            errors.rejectValue("userId", "", "The task does not belong the user");
+        if(!taskWithSameId.get().getUserId().equals(currentUser.getId().toString()) ){
+            errors.rejectValue("id", "", "The task does not belong the user");
         }
     }
 }
