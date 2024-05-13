@@ -8,15 +8,18 @@ import com.sotnikov.ListToDoBackend.models.User;
 import com.sotnikov.ListToDoBackend.security.UserDetailsImpl;
 import com.sotnikov.ListToDoBackend.services.TasksService;
 import com.sotnikov.ListToDoBackend.util.ChangingTaskValidator;
+import com.sotnikov.ListToDoBackend.util.ErrorMessageMaker;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/tasks")
@@ -37,7 +40,7 @@ public class TaskController {
     }
 
     @PostMapping("/add")
-    public HttpStatus saveTask(@RequestBody @Valid CreationTaskDTO creationTaskDTO, BindingResult bindingResult){
+    public ResponseEntity<Map<String, String>> saveTask(@RequestBody @Valid CreationTaskDTO creationTaskDTO, BindingResult bindingResult){
 
         if(bindingResult.hasErrors()){
             throw new TaskException("Task is not created");
@@ -47,7 +50,7 @@ public class TaskController {
 
         tasksService.save(task);
 
-        return HttpStatus.CREATED;
+        return new ResponseEntity<>(Map.of("id", task.getId()), HttpStatus.CREATED);
     }
 
     @PatchMapping("/edit")
@@ -57,7 +60,7 @@ public class TaskController {
         changingTaskValidator.validate(updatedTask, bindingResult);
 
         if(bindingResult.hasErrors()){
-            throw new TaskException("Data of task is not changed");
+            throw new TaskException(ErrorMessageMaker.formErrorMessage(bindingResult));
         }
 
         tasksService.update(updatedTask);

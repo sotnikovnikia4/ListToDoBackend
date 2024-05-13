@@ -23,4 +23,18 @@ public class ErrorMessageMaker {
 
         return map;
     }
+
+    public static String formErrorMessage(BindingResult bindingResult){
+        if(bindingResult == null) return "";
+
+        StringBuilder sb = new StringBuilder();
+
+        for(FieldError error : bindingResult.getFieldErrors()){
+            sb.append(error.getField()).append(": ").append(error.getDefaultMessage()).append("; ");
+        }
+
+        sb.setLength(sb.length() - 2);
+
+        return sb.toString();
+    }
 }
