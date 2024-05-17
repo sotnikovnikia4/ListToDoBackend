@@ -43,7 +43,7 @@ public class TaskController {
     public ResponseEntity<Map<String, String>> saveTask(@RequestBody @Valid CreationTaskDTO creationTaskDTO, BindingResult bindingResult){
 
         if(bindingResult.hasErrors()){
-            throw new TaskException("Task is not created");
+            throw new TaskException(ErrorMessageMaker.formErrorMessage(bindingResult));
         }
 
         Task task = convertToTask(creationTaskDTO);
