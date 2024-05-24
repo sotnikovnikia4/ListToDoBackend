@@ -33,7 +33,7 @@ class UsersRepositoryTest {
     }
 
     @Test
-    void testSaveEntity(){
+    void SaveEntity_ReturnsNotNull(){
 
         User savedUser = usersRepository.save(user);
         user.setId(savedUser.getId());
@@ -43,11 +43,11 @@ class UsersRepositoryTest {
     }
 
     @Test
-    void testFindByLogin(){
+    void FindByLogin_ReturnsNotNull(){
         usersRepository.save(user);
 
-        Optional<User> userByLogin = usersRepository.findByLogin("123");
+        User userByLogin = usersRepository.findByLogin("123").get();
 
-        Assertions.assertThat(userByLogin.isPresent()).isEqualTo(true);
+        Assertions.assertThat(userByLogin).isNotNull();
     }
 }
