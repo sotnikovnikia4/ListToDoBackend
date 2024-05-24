@@ -20,7 +20,7 @@ public class RegistrationValidator implements Validator {
     }
 
     @Override
-    public void validate(Object target, Errors errors) {//TODO
+    public void validate(Object target, Errors errors) {
         User userToCheck = (User)target;
         Optional<User> userWithSameLogin = usersService.findOne(userToCheck.getLogin());
 

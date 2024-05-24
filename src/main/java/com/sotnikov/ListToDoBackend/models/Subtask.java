@@ -1,16 +1,13 @@
 package com.sotnikov.ListToDoBackend.models;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 import org.springframework.data.annotation.Transient;
 
-@Getter
-@Setter
+@Data
+@Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class Subtask {//TODO
+public class Subtask {
     private String name;
     private String description;
     private boolean completed;
