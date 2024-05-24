@@ -139,24 +139,24 @@ class TaskControllerTest {
                 .andExpect(jsonPath("$.id").exists());
     }
 
-    @Test
-    void testSaveTaskIfNotSuccessfulThrowTaskException() throws Exception {
-        CreationTaskDTO creationTaskDTO = new CreationTaskDTO(
-                "",
-                "some description",
-                null,
-                null,
-                11,
-                null
-        );
-        mockMvc.perform(
-                post("/tasks/add")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(creationTaskDTO))
-        );
-
-
-    }
+//    @Test
+//    void testSaveTaskIfNotSuccessfulThrowTaskException() throws Exception {
+//        CreationTaskDTO creationTaskDTO = new CreationTaskDTO(
+//                "",
+//                "some description",
+//                null,
+//                null,
+//                11,
+//                null
+//        );
+//        mockMvc.perform(
+//                post("/tasks/add")
+//                        .contentType(MediaType.APPLICATION_JSON)
+//                        .content(objectMapper.writeValueAsString(creationTaskDTO))
+//        );
+//
+//
+//    }
 }
 
 

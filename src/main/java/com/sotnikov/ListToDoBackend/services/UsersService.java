@@ -4,9 +4,7 @@ import com.sotnikov.ListToDoBackend.exceptions.UserDataNotChangedException;
 import com.sotnikov.ListToDoBackend.models.User;
 import com.sotnikov.ListToDoBackend.repotitories.TasksRepository;
 import com.sotnikov.ListToDoBackend.repotitories.UsersRepository;
-import com.sotnikov.ListToDoBackend.security.UserDetailsImpl;
 import lombok.RequiredArgsConstructor;
-import org.hibernate.Hibernate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
