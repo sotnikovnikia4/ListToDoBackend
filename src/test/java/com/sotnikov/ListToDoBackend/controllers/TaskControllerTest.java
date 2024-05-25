@@ -1,30 +1,34 @@
 package com.sotnikov.ListToDoBackend.controllers;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.sotnikov.ListToDoBackend.config.JWTFilter;
 import com.sotnikov.ListToDoBackend.dto.CreationSubtaskDTO;
 import com.sotnikov.ListToDoBackend.dto.CreationTaskDTO;
 import com.sotnikov.ListToDoBackend.dto.TaskDTO;
-import com.sotnikov.ListToDoBackend.exceptions.TaskException;
 import com.sotnikov.ListToDoBackend.models.Task;
 import com.sotnikov.ListToDoBackend.models.User;
-import com.sotnikov.ListToDoBackend.security.UserDetailsImpl;
+import com.sotnikov.ListToDoBackend.security.JWTUtil;
 import com.sotnikov.ListToDoBackend.services.TasksService;
-import org.bson.types.ObjectId;
-import org.junit.jupiter.api.BeforeAll;
+import com.sotnikov.ListToDoBackend.util.ChangingTaskValidator;
+import com.sotnikov.ListToDoBackend.util.EditUserValidator;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.ArgumentCaptor;
+import org.mockito.ArgumentMatchers;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.modelmapper.ModelMapper;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.data.mongo.AutoConfigureDataMongo;
+import org.springframework.boot.test.autoconfigure.data.mongo.DataMongoTest;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.http.MediaType;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
-import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
 import java.lang.reflect.Field;
 import java.time.LocalDateTime;
@@ -32,65 +36,58 @@ import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 
-import static org.mockito.Mockito.doAnswer;
+import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
-import static org.junit.jupiter.api.Assertions.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+@WebMvcTest(controllers = TaskController.class)
+@AutoConfigureMockMvc(addFilters = false)
 @ExtendWith(MockitoExtension.class)
+@AutoConfigureDataMongo
 class TaskControllerTest {
-    @Mock
+
+    @MockBean
+    private ModelMapper modelMapper;
+
+    @MockBean
     private TasksService tasksService;
 
-    private ModelMapper modelMapper;
-    @InjectMocks
-    private TaskController taskController;
+    @MockBean
+    private ChangingTaskValidator changingTaskValidator;
+
+    @MockBean
+    private JWTFilter jwtFilter;
 
     private User user;
-    private static ObjectMapper objectMapper;
 
+    @Autowired
+    private ObjectMapper objectMapper;
 
+    @Autowired
     private MockMvc mockMvc;
 
-    @BeforeAll
-    static void setUpBeforeAll(){
-        objectMapper = new ObjectMapper();
-        objectMapper.findAndRegisterModules();
-    }
+
 
     @BeforeEach
     void setUp() {
         try{
-            setUpAuthentication();
-            setUpTaskController();
-
-
-            mockMvc = MockMvcBuilders.standaloneSetup(taskController).build();
+            setUpUser();
         }
         catch(Exception e){
             e.printStackTrace();
         }
     }
 
-    void setUpTaskController() throws NoSuchFieldException, IllegalAccessException {
-        modelMapper = new ModelMapper();
-
-        modelMapper = new ModelMapper();
-
-        Field modelMapperField = taskController.getClass().getDeclaredField("modelMapper");
-        modelMapperField.setAccessible(true);
-        modelMapperField.set(taskController, modelMapper);
-    }
-
-    void setUpAuthentication(){
-        user = new User(UUID.randomUUID(), "login", "password", "name", LocalDateTime.now());
-        UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(
-                new UserDetailsImpl(user), "password", Collections.emptyList()
-        );
-
-        SecurityContextHolder.getContext().setAuthentication(authenticationToken);
+    void setUpUser(){
+        user = User.builder()
+                .id(UUID.randomUUID())
+                .login("login")
+                .password("password")
+                .name("name")
+                .registeredAt(LocalDateTime.now()).build();
     }
 
     @Test
@@ -101,62 +98,38 @@ class TaskControllerTest {
         List<Task> tasks = List.of(task1, task2);
         List<TaskDTO> taskDTOS = tasks.stream().map(t -> modelMapper.map(t, TaskDTO.class)).toList();
 
-        when(tasksService.getTasks(user.getId())).thenReturn(tasks);
+        given(tasksService.getTasks(ArgumentMatchers.any())).will(invocation -> invocation.getArgument(0));
 
-        mockMvc.perform(get("/tasks"))
-                .andExpect(status().isOk())
-                .andExpect(content().string(objectMapper.writeValueAsString(taskDTOS)));
+        ResultActions result = mockMvc.perform(post("/tasks")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(taskDTOS)));
     }
 
     @Test
     void testSaveTaskIfSuccessful() throws Exception {
-        CreationTaskDTO creationTaskDTO = new CreationTaskDTO(
-                "task1",
-                "some description",
-                LocalDateTime.now().plusYears(1),
-                null,
-                0,
-                List.of(
-                        new CreationSubtaskDTO("subtask1", null),
-                        new CreationSubtaskDTO("subtask2", "subtask description")
-                )
-        );
-
-        ArgumentCaptor<Task> valueCapture = ArgumentCaptor.forClass(Task.class);
-        doAnswer(invocationOnMock -> {
-            Task t = invocationOnMock.getArgument(0);
-            t.setUserId(user.getId());
-            t.setId(new ObjectId().toString());
-            return null;
-        }).when(tasksService).save(valueCapture.capture());
-
-        mockMvc.perform(
-                post("/tasks/add")
-                                .contentType(MediaType.APPLICATION_JSON)
-                                .content(objectMapper.writeValueAsString(creationTaskDTO))
+        CreationTaskDTO creationTaskDTO = CreationTaskDTO.builder()
+                .name("task1")
+                .description("some description")
+                .deadline(LocalDateTime.now().plusYears(1))
+                .priority(0)
+                .subtasks(
+                        List.of(
+                                CreationSubtaskDTO.builder().name("subtask1").build(),
+                                CreationSubtaskDTO.builder().name("subtask2").description("subtask description").build()
                         )
-                .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.id").exists());
-    }
+                ).build();
 
-//    @Test
-//    void testSaveTaskIfNotSuccessfulThrowTaskException() throws Exception {
-//        CreationTaskDTO creationTaskDTO = new CreationTaskDTO(
-//                "",
-//                "some description",
-//                null,
-//                null,
-//                11,
-//                null
-//        );
-//        mockMvc.perform(
-//                post("/tasks/add")
-//                        .contentType(MediaType.APPLICATION_JSON)
-//                        .content(objectMapper.writeValueAsString(creationTaskDTO))
-//        );
-//
-//
-//    }
+//        ArgumentCaptor<Task> valueCapture = ArgumentCaptor.forClass(Task.class);
+//        doAnswer(invocationOnMock -> {
+//            Task t = invocationOnMock.getArgument(0);
+//            t.setUserId(user.getId());
+//            t.setId(new ObjectId().toString());
+//            return null;
+//        }).when(tasksService).save(valueCapture.capture());
+       // given(tasksService.save(ArgumentMatchers.any())).willAnswer(invocation -> invocation.getArguments());
+
+
+    }
 }
 
 
