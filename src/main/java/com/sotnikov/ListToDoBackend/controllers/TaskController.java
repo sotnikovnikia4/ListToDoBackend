@@ -40,7 +40,7 @@ public class TaskController {
     }
 
     @PostMapping("/add")
-    public ResponseEntity<Map<String, String>> saveTask(@RequestBody @Valid CreationTaskDTO creationTaskDTO, BindingResult bindingResult){
+    public ResponseEntity<TaskDTO> saveTask(@RequestBody @Valid CreationTaskDTO creationTaskDTO, BindingResult bindingResult){
 
         if(bindingResult.hasErrors()){
             throw new TaskException(ErrorMessageMaker.formErrorMessage(bindingResult));
@@ -48,9 +48,9 @@ public class TaskController {
 
         Task task = convertToTask(creationTaskDTO);
 
-        tasksService.save(task);
+        task = tasksService.save(task);
 
-        return new ResponseEntity<>(Map.of("id", task.getId()), HttpStatus.CREATED);
+        return new ResponseEntity<>(convertToTaskDTO(task), HttpStatus.CREATED);
     }
 
     @PatchMapping("/edit")

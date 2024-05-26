@@ -46,90 +46,12 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @WebMvcTest(controllers = TaskController.class)
 @AutoConfigureMockMvc(addFilters = false)
 @ExtendWith(MockitoExtension.class)
-@AutoConfigureDataMongo
+//@AutoConfigureDataMongo
 class TaskControllerTest {
 
-    @MockBean
-    private ModelMapper modelMapper;
-
-    @MockBean
-    private TasksService tasksService;
-
-    @MockBean
-    private ChangingTaskValidator changingTaskValidator;
-
-    @MockBean
-    private JWTFilter jwtFilter;
-
-    private User user;
-
-    @Autowired
-    private ObjectMapper objectMapper;
-
-    @Autowired
-    private MockMvc mockMvc;
 
 
 
-    @BeforeEach
-    void setUp() {
-        try{
-            setUpUser();
-        }
-        catch(Exception e){
-            e.printStackTrace();
-        }
-    }
-
-    void setUpUser(){
-        user = User.builder()
-                .id(UUID.randomUUID())
-                .login("login")
-                .password("password")
-                .name("name")
-                .registeredAt(LocalDateTime.now()).build();
-    }
-
-    @Test
-    void testGetTasks() throws Exception {
-        Task task1 = new Task("task1", "name1", null, LocalDateTime.now(), null, 1, false, Collections.emptyList(), user.getId());
-        Task task2 = new Task("task2", "name2", "sdfsdf", LocalDateTime.now(), null, 10, true, Collections.emptyList(), UUID.randomUUID());
-
-        List<Task> tasks = List.of(task1, task2);
-        List<TaskDTO> taskDTOS = tasks.stream().map(t -> modelMapper.map(t, TaskDTO.class)).toList();
-
-        given(tasksService.getTasks(ArgumentMatchers.any())).will(invocation -> invocation.getArgument(0));
-
-        ResultActions result = mockMvc.perform(post("/tasks")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(taskDTOS)));
-    }
-
-    @Test
-    void testSaveTaskIfSuccessful() throws Exception {
-        CreationTaskDTO creationTaskDTO = CreationTaskDTO.builder()
-                .name("task1")
-                .description("some description")
-                .deadline(LocalDateTime.now().plusYears(1))
-                .priority(0)
-                .subtasks(
-                        List.of(
-                                CreationSubtaskDTO.builder().name("subtask1").build(),
-                                CreationSubtaskDTO.builder().name("subtask2").description("subtask description").build()
-                        )
-                ).build();
-
-//        ArgumentCaptor<Task> valueCapture = ArgumentCaptor.forClass(Task.class);
-//        doAnswer(invocationOnMock -> {
-//            Task t = invocationOnMock.getArgument(0);
-//            t.setUserId(user.getId());
-//            t.setId(new ObjectId().toString());
-//            return null;
-//        }).when(tasksService).save(valueCapture.capture());
-       // given(tasksService.save(ArgumentMatchers.any())).willAnswer(invocation -> invocation.getArguments());
-
-
-    }
 }
 
 

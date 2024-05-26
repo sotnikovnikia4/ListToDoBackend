@@ -1,5 +1,6 @@
 package com.sotnikov.ListToDoBackend.services;
 
+import com.sotnikov.ListToDoBackend.config.UserDetailsHolder;
 import com.sotnikov.ListToDoBackend.exceptions.TaskException;
 import com.sotnikov.ListToDoBackend.models.Task;
 import com.sotnikov.ListToDoBackend.models.User;
@@ -28,10 +29,10 @@ public class TasksService {
         return tasksRepository.findById(convertToObjectId(id));
     }
 
-    public void save(Task task){
+    public Task save(Task task){
         enrich(task);
 
-        tasksRepository.insert(task);
+        return tasksRepository.insert(task);
     }
 
     public void update(Task updatedTask){
@@ -60,7 +61,7 @@ public class TasksService {
     }
 
     private void enrich(Task task){
-        User user = ((UserDetailsImpl) SecurityContextHolder.getContext().getAuthentication().getPrincipal()).getUser();
+        User user = UserDetailsHolder.getUserFromSecurityContext();
 
         task.setUserId(user.getId());
     }
