@@ -1,13 +1,9 @@
 package com.sotnikov.ListToDoBackend.util;
 
 import com.sotnikov.ListToDoBackend.config.UserDetailsHolder;
-import com.sotnikov.ListToDoBackend.exceptions.UserDataNotChangedException;
 import com.sotnikov.ListToDoBackend.models.User;
-import com.sotnikov.ListToDoBackend.security.UserDetailsImpl;
 import com.sotnikov.ListToDoBackend.services.UsersService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 import org.springframework.validation.Errors;
 import org.springframework.validation.Validator;
