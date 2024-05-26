@@ -42,8 +42,9 @@ public class UsersController {
         }
 
         User currentUser = userDetailsHolder.getUserFromSecurityContext();
+        newUserData.setId(currentUser.getId());
 
-        return convertToUserDTO(usersService.update(newUserData, currentUser.getId()));
+        return convertToUserDTO(usersService.update(newUserData));
     }
 
     @DeleteMapping("/delete")

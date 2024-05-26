@@ -26,8 +26,8 @@ public class UsersService {
     }
 
     @Transactional
-    public User update(User updatedUser, UUID id){
-        Optional<User> userToUpdate = usersRepository.findById(id);
+    public User update(User updatedUser){
+        Optional<User> userToUpdate = usersRepository.findById(updatedUser.getId());
 
         if(userToUpdate.isPresent()){
             userToUpdate.get().setName(updatedUser.getName());
