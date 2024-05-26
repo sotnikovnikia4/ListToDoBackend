@@ -1,5 +1,6 @@
 package com.sotnikov.ListToDoBackend.util;
 
+import com.sotnikov.ListToDoBackend.config.UserDetailsHolder;
 import com.sotnikov.ListToDoBackend.models.Task;
 import com.sotnikov.ListToDoBackend.models.User;
 import com.sotnikov.ListToDoBackend.security.UserDetailsImpl;
@@ -17,6 +18,7 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class ChangingTaskValidator implements Validator {
     private final TasksService tasksService;
+    private final UserDetailsHolder userDetailsHolder;
 
     @Override
     public boolean supports(Class<?> clazz) {
@@ -27,7 +29,7 @@ public class ChangingTaskValidator implements Validator {
     public void validate(Object target, Errors errors) {
         Task task = (Task)target;
 
-        User currentUser = ((UserDetailsImpl)SecurityContextHolder.getContext().getAuthentication().getPrincipal()).getUser();
+        User currentUser = userDetailsHolder.getUserFromSecurityContext();
         Optional<Task> taskWithSameId = tasksService.getOne(task.getId());
 
         if(taskWithSameId.isEmpty()){

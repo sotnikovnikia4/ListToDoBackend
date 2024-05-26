@@ -1,5 +1,6 @@
 package com.sotnikov.ListToDoBackend.controllers;
 
+import com.sotnikov.ListToDoBackend.config.UserDetailsHolder;
 import com.sotnikov.ListToDoBackend.dto.UserDTO;
 import com.sotnikov.ListToDoBackend.exceptions.UserDataNotChangedException;
 import com.sotnikov.ListToDoBackend.models.User;
@@ -30,6 +31,8 @@ public class UsersController {
 
     private final PasswordEncoder passwordEncoder;
 
+    private final UserDetailsHolder userDetailsHolder;
+
     @PatchMapping("/edit")
     @ResponseStatus(HttpStatus.OK)
     public void edit(@Valid @RequestBody UserDTO userDTO, BindingResult bindingResult){
@@ -42,14 +45,14 @@ public class UsersController {
 
         newUserData.setPassword(passwordEncoder.encode(newUserData.getPassword()));
 
-        User currentUser = ((UserDetailsImpl)SecurityContextHolder.getContext().getAuthentication().getPrincipal()).getUser();
+        User currentUser = userDetailsHolder.getUserFromSecurityContext();
         usersService.update(newUserData, currentUser.getId());
     }
 
     @DeleteMapping("/delete")
     @ResponseStatus(HttpStatus.OK)
     public void delete(){
-        User currentUser = ((UserDetailsImpl)SecurityContextHolder.getContext().getAuthentication().getPrincipal()).getUser();
+        User currentUser = userDetailsHolder.getUserFromSecurityContext();
 
         usersService.delete(currentUser);
     }
