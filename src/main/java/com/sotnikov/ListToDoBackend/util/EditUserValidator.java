@@ -1,5 +1,6 @@
 package com.sotnikov.ListToDoBackend.util;
 
+import com.sotnikov.ListToDoBackend.config.UserDetailsHolder;
 import com.sotnikov.ListToDoBackend.exceptions.UserDataNotChangedException;
 import com.sotnikov.ListToDoBackend.models.User;
 import com.sotnikov.ListToDoBackend.security.UserDetailsImpl;
@@ -20,6 +21,8 @@ public class EditUserValidator implements Validator {
 
     private final UsersService usersService;
 
+    private final UserDetailsHolder userDetailsHolder;
+
     @Override
     public boolean supports(Class<?> clazz) {
         return clazz.equals(User.class);
@@ -29,9 +32,9 @@ public class EditUserValidator implements Validator {
     public void validate(Object target, Errors errors) {
         User updatedUser = (User)target;
         Optional<User> userWithSameLogin = usersService.findOne(updatedUser.getLogin());
-        String loginOfCurrentUser = ((UserDetails)SecurityContextHolder.getContext().getAuthentication().getPrincipal()).getUsername();
+        User currentUser = userDetailsHolder.getUserFromSecurityContext();
 
-        if(userWithSameLogin.isPresent() && !Objects.equals(userWithSameLogin.get().getLogin(), loginOfCurrentUser)){
+        if(userWithSameLogin.isPresent() && !Objects.equals(userWithSameLogin.get().getLogin(), currentUser.getLogin())){
             errors.rejectValue("login", "", "This login is already occupied");
         }
     }

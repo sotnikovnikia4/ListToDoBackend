@@ -29,24 +29,21 @@ public class UsersController {
     private final EditUserValidator editUserValidator;
     private final UsersService usersService;
 
-    private final PasswordEncoder passwordEncoder;
-
     private final UserDetailsHolder userDetailsHolder;
 
     @PatchMapping("/edit")
     @ResponseStatus(HttpStatus.OK)
-    public void edit(@Valid @RequestBody UserDTO userDTO, BindingResult bindingResult){
+    public UserDTO edit(@Valid @RequestBody UserDTO userDTO, BindingResult bindingResult){
         User newUserData = convertToUser(userDTO);
         editUserValidator.validate(newUserData, bindingResult);
 
         if(bindingResult.hasErrors()){
-            throw new UserDataNotChangedException("User data is not changed, invalid data");
+            throw new UserDataNotChangedException(ErrorMessageMaker.formErrorMessage(bindingResult));
         }
 
-        newUserData.setPassword(passwordEncoder.encode(newUserData.getPassword()));
-
         User currentUser = userDetailsHolder.getUserFromSecurityContext();
-        usersService.update(newUserData, currentUser.getId());
+
+        return convertToUserDTO(usersService.update(newUserData, currentUser.getId()));
     }
 
     @DeleteMapping("/delete")
@@ -59,5 +56,9 @@ public class UsersController {
 
     private User convertToUser(UserDTO userDTO){
         return modelMapper.map(userDTO, User.class);
+    }
+
+    private UserDTO convertToUserDTO(User user){
+        return modelMapper.map(user, UserDTO.class);
     }
 }
