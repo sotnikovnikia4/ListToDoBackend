@@ -15,7 +15,7 @@ import java.util.Collections;
 
 @Component
 @RequiredArgsConstructor
-public class AuthManagerImpl implements AuthenticationManager {
+public class AuthenticationManagerImpl implements AuthenticationManager {
     private final UserDetailsServiceImpl userDetailsService;
     private final PasswordEncoder passwordEncoder;
 

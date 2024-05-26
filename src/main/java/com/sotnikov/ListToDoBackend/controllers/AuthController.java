@@ -1,10 +1,10 @@
 package com.sotnikov.ListToDoBackend.controllers;
 
 import com.sotnikov.ListToDoBackend.dto.AuthenticationDTO;
+import com.sotnikov.ListToDoBackend.dto.TokenDTO;
 import com.sotnikov.ListToDoBackend.dto.UserDTO;
 import com.sotnikov.ListToDoBackend.exceptions.NotRegisteredException;
 import com.sotnikov.ListToDoBackend.models.User;
-import com.sotnikov.ListToDoBackend.security.AuthManagerImpl;
 import com.sotnikov.ListToDoBackend.security.JWTUtil;
 import com.sotnikov.ListToDoBackend.security.UserDetailsImpl;
 import com.sotnikov.ListToDoBackend.services.RegistrationService;
@@ -16,13 +16,12 @@ import org.modelmapper.ModelMapper;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.validation.BindingResult;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.Map;
 
@@ -35,13 +34,14 @@ public class AuthController {
     private final RegistrationService registrationService;
     private final JWTUtil jwtUtil;
 
-    private final AuthManagerImpl authManager;
+    private final AuthenticationManager authManager;
 
     private final ModelMapper modelMapper;
 
     @PostMapping("/registration")
-    public ResponseEntity<Map<String,Object>> register(@RequestBody @Valid UserDTO userDTO,
-                                                       BindingResult bindingResult){
+    @ResponseStatus(HttpStatus.CREATED)
+    public ResponseEntity<TokenDTO> register(@RequestBody @Valid UserDTO userDTO,
+                                          BindingResult bindingResult){
 
         User user = convertToUser(userDTO);
         registrationValidator.validate(user, bindingResult);
@@ -52,16 +52,24 @@ public class AuthController {
 
         registrationService.register(user);
 
-        String token = jwtUtil.generateToken(user);
+        TokenDTO token = TokenDTO.builder()
+                .token(jwtUtil.generateToken(user))
+                .build();
 
         return new ResponseEntity<>(
-                Map.of("token", token),
-                HttpStatus.OK
+                token,
+                HttpStatus.CREATED
         );
     }
 
     @PostMapping("/login")
-    public ResponseEntity<Map<String,Object>> login(@Valid @RequestBody AuthenticationDTO authenticationDTO, BindingResult bindingResult){
+    @ResponseStatus(HttpStatus.OK)
+    public ResponseEntity<TokenDTO> login(@Valid @RequestBody AuthenticationDTO authenticationDTO, BindingResult bindingResult){
+
+        if(bindingResult.hasErrors()){
+            throw new UsernameNotFoundException(ErrorMessageMaker.formErrorMessage(bindingResult));
+        }
+
         UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
                 authenticationDTO.getLogin(),
                 authenticationDTO.getPassword()
@@ -70,9 +78,11 @@ public class AuthController {
         Authentication authentication = authManager.authenticate(authToken);
         UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
 
-        String token = jwtUtil.generateToken(userDetails.getUser());
+        TokenDTO token = TokenDTO.builder()
+                .token(jwtUtil.generateToken(userDetails.getUser()))
+                .build();
 
-        return new ResponseEntity<>(Map.of("token", token), HttpStatus.OK);
+        return new ResponseEntity<>(token, HttpStatus.OK);
     }
 
     private User convertToUser(UserDTO userDTO){
