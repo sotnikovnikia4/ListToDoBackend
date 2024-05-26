@@ -3,13 +3,12 @@ package com.sotnikov.ListToDoBackend.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.validation.constraints.NotBlank;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
-@Getter
-@Setter
 @NoArgsConstructor
+@AllArgsConstructor
+@Builder
+@Data
 public class AuthenticationDTO {
 
     @JsonProperty("login")
