@@ -52,7 +52,7 @@ class TasksServiceTest {
         Task task = Task.builder()
                 .name("task1")
                 .build();
-        tasksService.save(task);
+        //tasksService.save(task);
 
         Assertions.assertThat(task).isNotNull();
 

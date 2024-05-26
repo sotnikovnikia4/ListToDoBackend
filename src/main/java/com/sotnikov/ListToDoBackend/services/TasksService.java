@@ -29,23 +29,29 @@ public class TasksService {
         return tasksRepository.findById(convertToObjectId(id));
     }
 
-    public Task save(Task task){
-        enrich(task);
+    public Task save(Task task, User user){
+        enrich(task, user);
 
         return tasksRepository.insert(task);
     }
 
-    public void update(Task updatedTask){
+    public Task update(Task updatedTask){
         Optional<Task> taskWithSameId = getOne(updatedTask.getId());
 
         if(taskWithSameId.isPresent()){
-            enrich(updatedTask);
-            tasksRepository.save(updatedTask);
+            taskWithSameId.get().setCompleted(updatedTask.isCompleted());
+            taskWithSameId.get().setPriority(updatedTask.getPriority());
+            taskWithSameId.get().setSubtasks(updatedTask.getSubtasks());
+            taskWithSameId.get().setDeadline(updatedTask.getDeadline());
+            taskWithSameId.get().setDescription(updatedTask.getDescription());
+            taskWithSameId.get().setTag(updatedTask.getTag());
+            taskWithSameId.get().setName(updatedTask.getName());
+
+            return tasksRepository.save(taskWithSameId.get());
         }
         else{
             throw new TaskException("The task does not exist");
         }
-
     }
 
     public void delete(String id){
@@ -57,11 +63,9 @@ public class TasksService {
         else{
             throw new TaskException("The task does not exist");
         }
-
     }
 
-    private void enrich(Task task){
-        User user = UserDetailsHolder.getUserFromSecurityContext();
+    private void enrich(Task task, User user){
 
         task.setUserId(user.getId());
     }

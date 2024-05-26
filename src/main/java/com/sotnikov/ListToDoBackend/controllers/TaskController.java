@@ -1,5 +1,6 @@
 package com.sotnikov.ListToDoBackend.controllers;
 
+import com.sotnikov.ListToDoBackend.config.UserDetailsHolder;
 import com.sotnikov.ListToDoBackend.dto.CreationTaskDTO;
 import com.sotnikov.ListToDoBackend.dto.TaskDTO;
 import com.sotnikov.ListToDoBackend.exceptions.TaskException;
@@ -31,30 +32,32 @@ public class TaskController {
 
     private final ChangingTaskValidator changingTaskValidator;
 
+    private final UserDetailsHolder userDetailsHolder;
+
     @GetMapping
     @ResponseStatus(HttpStatus.OK)
     public List<TaskDTO> getTasks(){
-        User user = ((UserDetailsImpl)SecurityContextHolder.getContext().getAuthentication().getPrincipal()).getUser();
+        User user = userDetailsHolder.getUserFromSecurityContext();
 
         return tasksService.getTasks(user.getId()).stream().map(this::convertToTaskDTO).toList();
     }
 
     @PostMapping("/add")
+    @ResponseStatus(HttpStatus.CREATED)
     public ResponseEntity<TaskDTO> saveTask(@RequestBody @Valid CreationTaskDTO creationTaskDTO, BindingResult bindingResult){
 
         if(bindingResult.hasErrors()){
             throw new TaskException(ErrorMessageMaker.formErrorMessage(bindingResult));
         }
 
-        Task task = convertToTask(creationTaskDTO);
-
-        task = tasksService.save(task);
+        Task task = tasksService.save(convertToTask(creationTaskDTO), userDetailsHolder.getUserFromSecurityContext());
 
         return new ResponseEntity<>(convertToTaskDTO(task), HttpStatus.CREATED);
     }
 
     @PatchMapping("/edit")
-    public void editTask(@RequestBody @Valid TaskDTO taskDTO, BindingResult bindingResult){
+    @ResponseStatus(HttpStatus.OK)
+    public TaskDTO editTask(@RequestBody @Valid TaskDTO taskDTO, BindingResult bindingResult){
         Task updatedTask = convertToTask(taskDTO);
 
         changingTaskValidator.validate(updatedTask, bindingResult);
@@ -63,10 +66,11 @@ public class TaskController {
             throw new TaskException(ErrorMessageMaker.formErrorMessage(bindingResult));
         }
 
-        tasksService.update(updatedTask);
+        return convertToTaskDTO(tasksService.update(updatedTask));
     }
 
     @DeleteMapping("/delete")
+    @ResponseStatus(HttpStatus.OK)
     public void deleteTask(@RequestParam(name = "id") String id){
         tasksService.delete(id);
     }
