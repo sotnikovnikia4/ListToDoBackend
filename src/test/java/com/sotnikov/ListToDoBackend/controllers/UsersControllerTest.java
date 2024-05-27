@@ -82,7 +82,7 @@ class UsersControllerTest {
     }
 
     @Test
-    void delete() throws Exception {
+    void testDelete() throws Exception {
         doNothing().when(usersService).delete(ArgumentMatchers.any());
 
         ResultActions resultActions = mockMvc.perform(MockMvcRequestBuilders.delete("/users/delete")
