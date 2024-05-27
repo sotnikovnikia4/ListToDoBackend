@@ -25,8 +25,17 @@ public class TasksService {
         return tasksRepository.findByUserId(userId);
     }
 
-    public Optional<Task> getOne(String id){
-        return tasksRepository.findById(convertToObjectId(id));
+    public Task getOne(String id, User user){
+        Optional<Task> task = tasksRepository.findById(convertToObjectId(id));
+
+        if(task.isEmpty()){
+            throw new TaskException("This task does not exist!");
+        }
+        else if(!task.get().getUserId().equals(user.getId())){
+            throw new TaskException("The task does not belong to this user!");
+        }
+
+        return task.get();
     }
 
     public Task save(Task task, User user){
@@ -35,34 +44,24 @@ public class TasksService {
         return tasksRepository.insert(task);
     }
 
-    public Task update(Task updatedTask){
-        Optional<Task> taskWithSameId = getOne(updatedTask.getId());
+    public Task update(Task updatedTask, User user){
+        Task taskWithSameId = getOne(updatedTask.getId(), user);
 
-        if(taskWithSameId.isPresent()){
-            taskWithSameId.get().setCompleted(updatedTask.isCompleted());
-            taskWithSameId.get().setPriority(updatedTask.getPriority());
-            taskWithSameId.get().setSubtasks(updatedTask.getSubtasks());
-            taskWithSameId.get().setDeadline(updatedTask.getDeadline());
-            taskWithSameId.get().setDescription(updatedTask.getDescription());
-            taskWithSameId.get().setTag(updatedTask.getTag());
-            taskWithSameId.get().setName(updatedTask.getName());
+        taskWithSameId.setCompleted(updatedTask.isCompleted());
+        taskWithSameId.setPriority(updatedTask.getPriority());
+        taskWithSameId.setSubtasks(updatedTask.getSubtasks());
+        taskWithSameId.setDeadline(updatedTask.getDeadline());
+        taskWithSameId.setDescription(updatedTask.getDescription());
+        taskWithSameId.setTag(updatedTask.getTag());
+        taskWithSameId.setName(updatedTask.getName());
 
-            return tasksRepository.save(taskWithSameId.get());
-        }
-        else{
-            throw new TaskException("The task does not exist");
-        }
+        return tasksRepository.save(taskWithSameId);
     }
 
-    public void delete(String id){
-        Optional<Task> taskWithSameId = getOne(id);
+    public void delete(String taskId, User user){
+        Task taskWithSameId = getOne(taskId, user);
 
-        if(taskWithSameId.isPresent()){
-            tasksRepository.delete(taskWithSameId.get());
-        }
-        else{
-            throw new TaskException("The task does not exist");
-        }
+        tasksRepository.delete(taskWithSameId);
     }
 
     private void enrich(Task task, User user){

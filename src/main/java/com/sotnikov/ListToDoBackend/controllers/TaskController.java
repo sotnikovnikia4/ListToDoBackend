@@ -19,6 +19,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
+import javax.xml.transform.OutputKeys;
 import java.util.List;
 import java.util.Map;
 
@@ -40,6 +41,15 @@ public class TaskController {
         User user = userDetailsHolder.getUserFromSecurityContext();
 
         return tasksService.getTasks(user.getId()).stream().map(this::convertToTaskDTO).toList();
+    }
+
+    @GetMapping("/{id}")
+    @ResponseStatus(HttpStatus.OK)
+    public ResponseEntity<TaskDTO> getTask(@PathVariable("id") String taskId){
+        User currentUser = userDetailsHolder.getUserFromSecurityContext();
+        Task task = tasksService.getOne(taskId, currentUser);
+
+        return new ResponseEntity<>(convertToTaskDTO(task), HttpStatus.OK);
     }
 
     @PostMapping("/add")
@@ -66,13 +76,13 @@ public class TaskController {
             throw new TaskException(ErrorMessageMaker.formErrorMessage(bindingResult));
         }
 
-        return convertToTaskDTO(tasksService.update(updatedTask));
+        return convertToTaskDTO(tasksService.update(updatedTask, userDetailsHolder.getUserFromSecurityContext()));
     }
 
     @DeleteMapping("/delete")
     @ResponseStatus(HttpStatus.OK)
     public void deleteTask(@RequestParam(name = "id") String id){
-        tasksService.delete(id);
+        tasksService.delete(id, userDetailsHolder.getUserFromSecurityContext());
     }
 
     private Task convertToTask(CreationTaskDTO creationTaskDTO){

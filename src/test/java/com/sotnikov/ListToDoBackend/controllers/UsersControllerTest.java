@@ -44,9 +44,6 @@ class UsersControllerTest {
     @MockBean
     private EditUserValidator editUserValidator;
 
-    //@MockBean
-    //private ModelMapper modelMapper;
-
     @MockBean
     private UsersService usersService;
 

@@ -30,12 +30,9 @@ public class ChangingTaskValidator implements Validator {
         Task task = (Task)target;
 
         User currentUser = userDetailsHolder.getUserFromSecurityContext();
-        Optional<Task> taskWithSameId = tasksService.getOne(task.getId());
+        Task taskWithSameId = tasksService.getOne(task.getId(), userDetailsHolder.getUserFromSecurityContext());
 
-        if(taskWithSameId.isEmpty()){
-            errors.rejectValue("id", "", "The task does not exist");
-        }
-        else if(!Objects.equals(taskWithSameId.get().getUserId(), currentUser.getId())){
+        if(!Objects.equals(taskWithSameId.getUserId(), currentUser.getId())){
             errors.rejectValue("id", "", "The task does not belong the user");
         }
     }
