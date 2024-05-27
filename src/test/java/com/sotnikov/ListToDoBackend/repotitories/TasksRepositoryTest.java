@@ -13,6 +13,7 @@ import java.util.List;
 import java.util.UUID;
 
 @DataMongoTest
+@AutoConfigureDataMongo
 class TasksRepositoryTest {
 
     @Autowired
