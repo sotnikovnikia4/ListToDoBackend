@@ -1,4 +1,4 @@
-package com.sotnikov.ListToDoBackend.config;
+package com.sotnikov.ListToDoBackend.security;
 
 import com.auth0.jwt.exceptions.JWTVerificationException;
 import com.sotnikov.ListToDoBackend.controllers.ExceptionController;
@@ -61,11 +61,7 @@ public class JWTFilter extends OncePerRequestFilter {
     }
 
     private void trySetAuthentication(){
-        try {
-            setAuthentication();
-        } catch (JWTVerificationException | UsernameNotFoundException e) {
-            handlerExceptionResolver.resolveException(request, response, exceptionController, e);
-        }
+        setAuthentication();
     }
 
     private void setAuthentication(){

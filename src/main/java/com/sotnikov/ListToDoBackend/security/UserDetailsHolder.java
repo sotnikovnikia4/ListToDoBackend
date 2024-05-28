@@ -1,4 +1,4 @@
-package com.sotnikov.ListToDoBackend.config;
+package com.sotnikov.ListToDoBackend.security;
 
 import com.sotnikov.ListToDoBackend.models.User;
 import com.sotnikov.ListToDoBackend.security.UserDetailsImpl;

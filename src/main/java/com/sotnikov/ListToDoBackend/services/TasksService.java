@@ -1,14 +1,11 @@
 package com.sotnikov.ListToDoBackend.services;
 
-import com.sotnikov.ListToDoBackend.config.UserDetailsHolder;
 import com.sotnikov.ListToDoBackend.exceptions.TaskException;
 import com.sotnikov.ListToDoBackend.models.Task;
 import com.sotnikov.ListToDoBackend.models.User;
 import com.sotnikov.ListToDoBackend.repotitories.TasksRepository;
-import com.sotnikov.ListToDoBackend.security.UserDetailsImpl;
 import lombok.RequiredArgsConstructor;
 import org.bson.types.ObjectId;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;

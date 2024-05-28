@@ -1,22 +1,17 @@
 package com.sotnikov.ListToDoBackend.controllers;
 
-import com.sotnikov.ListToDoBackend.config.UserDetailsHolder;
+import com.sotnikov.ListToDoBackend.security.UserDetailsHolder;
 import com.sotnikov.ListToDoBackend.dto.UserDTO;
 import com.sotnikov.ListToDoBackend.exceptions.UserDataNotChangedException;
 import com.sotnikov.ListToDoBackend.models.User;
-import com.sotnikov.ListToDoBackend.security.UserDetailsImpl;
 import com.sotnikov.ListToDoBackend.services.UsersService;
 import com.sotnikov.ListToDoBackend.util.EditUserValidator;
 import com.sotnikov.ListToDoBackend.util.ErrorMessageMaker;
-import com.sotnikov.ListToDoBackend.util.RegistrationValidator;
-import jakarta.servlet.annotation.HttpConstraint;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 

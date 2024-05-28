@@ -1,7 +1,7 @@
 package com.sotnikov.ListToDoBackend.controllers;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.sotnikov.ListToDoBackend.config.UserDetailsHolder;
+import com.sotnikov.ListToDoBackend.security.UserDetailsHolder;
 import com.sotnikov.ListToDoBackend.dto.UserDTO;
 import com.sotnikov.ListToDoBackend.models.User;
 import com.sotnikov.ListToDoBackend.security.JWTUtil;

@@ -47,17 +47,17 @@ public class ExceptionController {
                 e.getMessage(),
                 new Date()
         );
-        return new ResponseEntity<>(response, HttpStatus.FORBIDDEN);
+        return new ResponseEntity<>(response, HttpStatus.UNAUTHORIZED);
     }
 
-    @ExceptionHandler(AccessDeniedException.class)
-    public ResponseEntity<ExceptionMessage> handleException(AccessDeniedException e){
-        ExceptionMessage response = new ExceptionMessage(
-                e.getMessage(),
-                new Date()
-        );
-        return new ResponseEntity<>(response, HttpStatus.FORBIDDEN);
-    }
+//    @ExceptionHandler(AccessDeniedException.class)
+//    public ResponseEntity<ExceptionMessage> handleException(AccessDeniedException e){
+//        ExceptionMessage response = new ExceptionMessage(
+//                e.getMessage(),
+//                new Date()
+//        );
+//        return new ResponseEntity<>(response, HttpStatus.FORBIDDEN);
+//    }
 
     @ExceptionHandler(TaskException.class)
     public ResponseEntity<ExceptionMessage> handleException(TaskException e){

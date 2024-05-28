@@ -3,17 +3,18 @@ package com.sotnikov.ListToDoBackend.repotitories;
 import com.sotnikov.ListToDoBackend.models.Task;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.data.mongo.AutoConfigureDataMongo;
 import org.springframework.boot.test.autoconfigure.data.mongo.DataMongoTest;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.data.mongodb.core.MongoTemplate;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import java.util.List;
 import java.util.UUID;
 
 @DataMongoTest
-@AutoConfigureDataMongo
+@ExtendWith(SpringExtension.class)
 class TasksRepositoryTest {
 
     @Autowired
@@ -21,7 +22,7 @@ class TasksRepositoryTest {
 
     @Test
     void testFindByUserId() {
-        UUID userId = UUID.randomUUID();
+        UUID userId = UUID.fromString("05f27597-dd71-4fbf-ba8e-2aebb12f3b9f");
         Task task1 = Task.builder()
                 .name("task1")
                 .userId(userId)
@@ -32,7 +33,12 @@ class TasksRepositoryTest {
                 .userId(userId)
                 .build();
 
-        tasksRepository.saveAll(List.of(task1, task2));
+        Task task3 = Task.builder()
+                .name("task3")
+                .userId(UUID.fromString("c8c8280c-a20b-4923-8b60-39c2001a1fa5"))
+                .build();
+
+        tasksRepository.saveAll(List.of(task1, task2, task3));
 
         List<Task> tasksByUserId = tasksRepository.findByUserId(userId);
 
@@ -41,7 +47,7 @@ class TasksRepositoryTest {
 
     @Test
     void testDeleteAllByUserIdIfDocumentHasOtherWithNotSameUserId() {
-        UUID userId1 = UUID.randomUUID();
+        UUID userId1 = UUID.fromString("05f27597-dd71-4fbf-ba8e-2aebb12f3b9f");
         Task task1 = Task.builder()
                 .name("task1")
                 .userId(userId1)
@@ -51,7 +57,7 @@ class TasksRepositoryTest {
                 .name("task2")
                 .userId(userId1)
                 .build();
-        UUID userId2 = UUID.randomUUID();
+        UUID userId2 = UUID.fromString("c8c8280c-a20b-4923-8b60-39c2001a1fa5");
         Task task3 = Task.builder()
                 .name("task3")
                 .userId(userId2)

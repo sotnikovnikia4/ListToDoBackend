@@ -1,18 +1,15 @@
 package com.sotnikov.ListToDoBackend.util;
 
-import com.sotnikov.ListToDoBackend.config.UserDetailsHolder;
+import com.sotnikov.ListToDoBackend.security.UserDetailsHolder;
 import com.sotnikov.ListToDoBackend.models.Task;
 import com.sotnikov.ListToDoBackend.models.User;
-import com.sotnikov.ListToDoBackend.security.UserDetailsImpl;
 import com.sotnikov.ListToDoBackend.services.TasksService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 import org.springframework.validation.Errors;
 import org.springframework.validation.Validator;
 
 import java.util.Objects;
-import java.util.Optional;
 
 @Component
 @RequiredArgsConstructor

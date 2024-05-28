@@ -1,12 +1,11 @@
 package com.sotnikov.ListToDoBackend.controllers;
 
-import com.sotnikov.ListToDoBackend.config.UserDetailsHolder;
+import com.sotnikov.ListToDoBackend.security.UserDetailsHolder;
 import com.sotnikov.ListToDoBackend.dto.CreationTaskDTO;
 import com.sotnikov.ListToDoBackend.dto.TaskDTO;
 import com.sotnikov.ListToDoBackend.exceptions.TaskException;
 import com.sotnikov.ListToDoBackend.models.Task;
 import com.sotnikov.ListToDoBackend.models.User;
-import com.sotnikov.ListToDoBackend.security.UserDetailsImpl;
 import com.sotnikov.ListToDoBackend.services.TasksService;
 import com.sotnikov.ListToDoBackend.util.ChangingTaskValidator;
 import com.sotnikov.ListToDoBackend.util.ErrorMessageMaker;
@@ -15,13 +14,10 @@ import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
-import javax.xml.transform.OutputKeys;
 import java.util.List;
-import java.util.Map;
 
 @RestController
 @RequestMapping("/tasks")

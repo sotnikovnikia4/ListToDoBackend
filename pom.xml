@@ -94,10 +94,11 @@
 			<version>2.2.224</version>
 			<scope>test</scope>
 		</dependency>
+		<!-- https://mvnrepository.com/artifact/de.flapdoodle.embed/de.flapdoodle.embed.mongo.spring30x -->
 		<dependency>
 			<groupId>de.flapdoodle.embed</groupId>
-			<artifactId>de.flapdoodle.embed.mongo</artifactId>
-			<version>4.13.1</version>
+			<artifactId>de.flapdoodle.embed.mongo.spring30x</artifactId>
+			<version>4.11.0</version>
 			<scope>test</scope>
 		</dependency>
 
