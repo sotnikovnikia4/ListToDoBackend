@@ -32,13 +32,13 @@ public class ExceptionController {
     @ExceptionHandler(UsernameNotFoundException.class)
     public ResponseEntity<ExceptionMessage> handleException(UsernameNotFoundException e){
         ExceptionMessage message = new ExceptionMessage(e.getMessage(), new Date());
-        return new ResponseEntity<>(message, HttpStatus.BAD_REQUEST);
+        return new ResponseEntity<>(message, HttpStatus.UNAUTHORIZED);
     }
 
     @ExceptionHandler(BadCredentialsException.class)
     public ResponseEntity<ExceptionMessage> handleException(BadCredentialsException e){
         ExceptionMessage message = new ExceptionMessage(e.getMessage(), new Date());
-        return new ResponseEntity<>(message, HttpStatus.BAD_REQUEST);
+        return new ResponseEntity<>(message, HttpStatus.UNAUTHORIZED);
     }
 
     @ExceptionHandler(JWTVerificationException.class)

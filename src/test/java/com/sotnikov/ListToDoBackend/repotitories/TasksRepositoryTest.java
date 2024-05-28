@@ -22,7 +22,7 @@ class TasksRepositoryTest {
 
     @Test
     void testFindByUserId() {
-        UUID userId = UUID.fromString("05f27597-dd71-4fbf-ba8e-2aebb12f3b9f");
+        UUID userId = UUID.fromString("f99c3448-041b-4d00-b7df-6173d1058e03");
         Task task1 = Task.builder()
                 .name("task1")
                 .userId(userId)
@@ -35,7 +35,7 @@ class TasksRepositoryTest {
 
         Task task3 = Task.builder()
                 .name("task3")
-                .userId(UUID.fromString("c8c8280c-a20b-4923-8b60-39c2001a1fa5"))
+                .userId(UUID.fromString("907cd259-a856-4e49-9047-bbdd37e0bf56"))
                 .build();
 
         tasksRepository.saveAll(List.of(task1, task2, task3));
@@ -71,7 +71,10 @@ class TasksRepositoryTest {
         List<Task> tasksByUserId1 = tasksRepository.findByUserId(userId1);
         List<Task> tasksByUserId2 = tasksRepository.findByUserId(userId2);
 
+        System.out.println(tasksByUserId2);
+
         Assertions.assertThat(tasksByUserId1.size()).isEqualTo(0);
         Assertions.assertThat(tasksByUserId2.size()).isEqualTo(1);
+
     }
 }
