@@ -1,10 +1,6 @@
-package com.sotnikov.ListToDoBackend.controllers;
+package com.sotnikov.ListToDoBackend.exceptions;
 
 import com.auth0.jwt.exceptions.JWTVerificationException;
-import com.sotnikov.ListToDoBackend.exceptions.ExceptionMessage;
-import com.sotnikov.ListToDoBackend.exceptions.NotRegisteredException;
-import com.sotnikov.ListToDoBackend.exceptions.TaskException;
-import com.sotnikov.ListToDoBackend.exceptions.UserDataNotChangedException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.BadCredentialsException;
@@ -12,7 +8,6 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
-import java.nio.file.AccessDeniedException;
 import java.util.Date;
 
 @RestControllerAdvice

@@ -1,10 +1,8 @@
 package com.sotnikov.ListToDoBackend.util;
 
-import org.modelmapper.internal.Errors;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
 
-import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;

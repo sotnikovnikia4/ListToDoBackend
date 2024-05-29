@@ -1,18 +1,16 @@
 package com.sotnikov.ListToDoBackend.controllers;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.sotnikov.ListToDoBackend.security.UserDetailsHolder;
 import com.sotnikov.ListToDoBackend.dto.UserDTO;
 import com.sotnikov.ListToDoBackend.models.User;
 import com.sotnikov.ListToDoBackend.security.JWTUtil;
+import com.sotnikov.ListToDoBackend.security.UserDetailsHolder;
 import com.sotnikov.ListToDoBackend.services.UsersService;
 import com.sotnikov.ListToDoBackend.util.EditUserValidator;
 import org.hamcrest.CoreMatchers;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentMatchers;
-import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.data.mongo.AutoConfigureDataMongo;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -32,7 +30,6 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 
 @WebMvcTest(controllers = UsersController.class)
 @AutoConfigureMockMvc(addFilters = false)
-@ExtendWith(MockitoExtension.class)
 @AutoConfigureDataMongo
 class UsersControllerTest {
     @Autowired

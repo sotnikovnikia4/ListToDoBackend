@@ -1,7 +1,6 @@
 package com.sotnikov.ListToDoBackend.security;
 
 import com.sotnikov.ListToDoBackend.models.User;
-import com.sotnikov.ListToDoBackend.security.UserDetailsImpl;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;

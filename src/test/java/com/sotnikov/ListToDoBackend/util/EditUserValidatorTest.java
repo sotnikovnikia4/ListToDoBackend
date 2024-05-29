@@ -1,7 +1,7 @@
 package com.sotnikov.ListToDoBackend.util;
 
-import com.sotnikov.ListToDoBackend.security.UserDetailsHolder;
 import com.sotnikov.ListToDoBackend.models.User;
+import com.sotnikov.ListToDoBackend.security.UserDetailsHolder;
 import com.sotnikov.ListToDoBackend.services.UsersService;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -15,7 +15,6 @@ import org.springframework.validation.Errors;
 
 import java.util.Optional;
 
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)

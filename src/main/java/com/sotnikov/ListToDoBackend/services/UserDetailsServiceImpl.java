@@ -4,7 +4,6 @@ import com.sotnikov.ListToDoBackend.models.User;
 import com.sotnikov.ListToDoBackend.repotitories.UsersRepository;
 import com.sotnikov.ListToDoBackend.security.UserDetailsImpl;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
