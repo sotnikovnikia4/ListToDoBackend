@@ -1,11 +1,11 @@
 package com.sotnikov.ListToDoBackend.controllers;
 
-import com.sotnikov.ListToDoBackend.security.UserDetailsHolder;
 import com.sotnikov.ListToDoBackend.dto.CreationTaskDTO;
 import com.sotnikov.ListToDoBackend.dto.TaskDTO;
 import com.sotnikov.ListToDoBackend.exceptions.TaskException;
 import com.sotnikov.ListToDoBackend.models.Task;
 import com.sotnikov.ListToDoBackend.models.User;
+import com.sotnikov.ListToDoBackend.security.UserDetailsHolder;
 import com.sotnikov.ListToDoBackend.services.TasksService;
 import com.sotnikov.ListToDoBackend.util.ChangingTaskValidator;
 import com.sotnikov.ListToDoBackend.util.ErrorMessageMaker;
@@ -41,7 +41,7 @@ public class TaskController {
 
     @GetMapping("/{id}")
     @ResponseStatus(HttpStatus.OK)
-    public ResponseEntity<TaskDTO> getTask(@PathVariable("id") String taskId){
+    public ResponseEntity<TaskDTO> getOneTask(@PathVariable("id") String taskId){
         User currentUser = userDetailsHolder.getUserFromSecurityContext();
         Task task = tasksService.getOne(taskId, currentUser);
 
@@ -61,9 +61,9 @@ public class TaskController {
         return new ResponseEntity<>(convertToTaskDTO(task), HttpStatus.CREATED);
     }
 
-    @PatchMapping("/edit")
+    @PatchMapping("/{id}/update")
     @ResponseStatus(HttpStatus.OK)
-    public TaskDTO editTask(@RequestBody @Valid TaskDTO taskDTO, BindingResult bindingResult){
+    public TaskDTO updateTask(@PathVariable(name = "id") String taskId, @RequestBody @Valid TaskDTO taskDTO, BindingResult bindingResult){
         Task updatedTask = convertToTask(taskDTO);
 
         changingTaskValidator.validate(updatedTask, bindingResult);
@@ -72,12 +72,12 @@ public class TaskController {
             throw new TaskException(ErrorMessageMaker.formErrorMessage(bindingResult));
         }
 
-        return convertToTaskDTO(tasksService.update(updatedTask, userDetailsHolder.getUserFromSecurityContext()));
+        return convertToTaskDTO(tasksService.update(taskId, updatedTask, userDetailsHolder.getUserFromSecurityContext()));
     }
 
-    @DeleteMapping("/delete")
+    @DeleteMapping("/{id}/delete")
     @ResponseStatus(HttpStatus.OK)
-    public void deleteTask(@RequestParam(name = "id") String id){
+    public void deleteTask(@PathVariable(name = "id") String id){
         tasksService.delete(id, userDetailsHolder.getUserFromSecurityContext());
     }
 

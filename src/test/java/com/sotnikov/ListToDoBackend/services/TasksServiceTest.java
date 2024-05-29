@@ -8,6 +8,7 @@ import com.sotnikov.ListToDoBackend.repotitories.TasksRepository;
 import org.assertj.core.api.Assertions;
 import org.bson.types.ObjectId;
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentMatchers;
@@ -17,13 +18,13 @@ import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class TasksServiceTest {
@@ -35,6 +36,8 @@ class TasksServiceTest {
 
     private static User authenticatedUser;
 
+    private Task task;
+
     @BeforeAll
     static void setUpBeforeAll(){
         authenticatedUser = User.builder()
@@ -42,6 +45,23 @@ class TasksServiceTest {
                 .name("John")
                 .login("123")
                 .password("123")
+                .build();
+    }
+
+    @BeforeEach
+    public void setUp(){
+        String taskId = ObjectId.get().toHexString();
+
+        task = Task.builder()
+                .id(taskId)
+                .description("description")
+                .completed(true)
+                .priority(1)
+                .name("name")
+                .userId(authenticatedUser.getId())
+                .deadline(LocalDateTime.now())
+                .subtasks(List.of(Subtask.builder().name("subtask").build()))
+                .tag("tag")
                 .build();
     }
 
@@ -85,9 +105,7 @@ class TasksServiceTest {
 
     @Test
     void testSave_ShouldReturnNotNull() {
-
         when(tasksRepository.insert(Mockito.any(Task.class))).thenAnswer(invocation -> invocation.getArgument(0));
-
 
         Task task = Task.builder()
                 .name("task")
@@ -100,115 +118,42 @@ class TasksServiceTest {
 
     @Test
     void testUpdateWithAuthenticatedUser_ShouldReturnUpdatedTask() {
-        String taskId = ObjectId.get().toHexString();
+        when(tasksRepository.findById(Mockito.any(ObjectId.class))).thenReturn(Optional.of(Task.builder().id(task.getId()).userId(task.getUserId()).build()));
+        when(tasksRepository.save(Mockito.any(Task.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
-        Task task = Task.builder()
-                .id(taskId)
-                .description("description")
-                .completed(true)
-                .priority(1)
-                .name("name")
-                .userId(authenticatedUser.getId())
-                .deadline(LocalDateTime.now())
-                .subtasks(List.of(Subtask.builder().name("subtask").build()))
-                .tag("tag")
-                .build();
-
-        when(tasksRepository.findById(Mockito.any(ObjectId.class))).thenReturn(Optional.of(Task.builder().userId(task.getUserId()).build()));
-        when(tasksRepository.save(Mockito.any(Task.class))).thenAnswer(invocation -> {
-            Task t = invocation.getArgument(0);
-            t.setId(taskId);
-            return t;
-        });
-
-        Task updatedTask = tasksService.update(task, authenticatedUser);
+        Task updatedTask = tasksService.update(task.getId(), task, authenticatedUser);
 
         Assertions.assertThat(updatedTask).isEqualTo(task);
     }
 
     @Test
     void testUpdateWithNotAuthenticatedUser_ShouldThrowTaskException() {
-        String taskId = ObjectId.get().toHexString();
+        task.setUserId(UUID.fromString("81b3d0dc-54c4-4cbe-b285-062fc7f0f5e4"));
 
-        Task task = Task.builder()
-                .id(taskId)
-                .description("description")
-                .completed(true)
-                .priority(1)
-                .name("name")
-                .userId(UUID.fromString("81b3d0dc-54c4-4cbe-b285-062fc7f0f5e4"))
-                .deadline(LocalDateTime.now())
-                .subtasks(List.of(Subtask.builder().name("subtask").build()))
-                .tag("tag")
-                .build();
+        when(tasksRepository.findById(Mockito.any(ObjectId.class))).thenReturn(Optional.of(Task.builder().id(task.getId()).userId(task.getUserId()).build()));
 
-        when(tasksRepository.findById(Mockito.any(ObjectId.class))).thenReturn(Optional.of(Task.builder().id(taskId).userId(task.getUserId()).build()));
-
-        TaskException e = assertThrows(TaskException.class, () -> tasksService.update(task, authenticatedUser));
+        TaskException e = assertThrows(TaskException.class, () -> tasksService.update(task.getId(), task, authenticatedUser));
         assertEquals("The task does not belong to this user!", e.getMessage());
     }
 
     @Test
     void testUpdateWhenTaskDoesNotExist_ShouldThrowTaskException() {
-        String taskId = ObjectId.get().toHexString();
-
-        Task task = Task.builder()
-                .id(taskId)
-                .description("description")
-                .completed(true)
-                .priority(1)
-                .name("name")
-                .userId(UUID.fromString("81b3d0dc-54c4-4cbe-b285-062fc7f0f5e4"))
-                .deadline(LocalDateTime.now())
-                .subtasks(List.of(Subtask.builder().name("subtask").build()))
-                .tag("tag")
-                .build();
-
         when(tasksRepository.findById(Mockito.any(ObjectId.class))).thenReturn(Optional.empty());
 
-        TaskException e = assertThrows(TaskException.class, () -> tasksService.update(task, authenticatedUser));
+        TaskException e = assertThrows(TaskException.class, () -> tasksService.update(task.getId(), task, authenticatedUser));
         assertEquals("This task does not exist!", e.getMessage());
     }
 
-
-
     @Test
     void testDeleteWhenTaskExist_NotShouldThrowException() {
-        String taskId = ObjectId.get().toHexString();
-        Task task = Task.builder()
-                .id(taskId)
-                .description("description")
-                .completed(true)
-                .priority(1)
-                .name("name")
-                .userId(authenticatedUser.getId())
-                .deadline(LocalDateTime.now())
-                .subtasks(List.of(Subtask.builder().name("subtask").build()))
-                .tag("tag")
-                .build();
-
         when(tasksRepository.findById(Mockito.any(ObjectId.class))).thenReturn(Optional.of(task));
         doNothing().when(tasksRepository).delete(ArgumentMatchers.any());
 
         assertDoesNotThrow(() -> tasksService.delete(task.getId(), authenticatedUser));
-
     }
 
     @Test
-    void testDeleteWhenTaskDoesNotExist_NotShouldThrowException() {
-        String taskId = ObjectId.get().toHexString();
-        Task task = Task.builder()
-                .id(taskId)
-                .description("description")
-                .completed(true)
-                .priority(1)
-                .name("name")
-                .userId(UUID.fromString("81b3d0dc-54c4-4cbe-b285-062fc7f0f5e4"))
-                .deadline(LocalDateTime.now())
-                .subtasks(List.of(Subtask.builder().name("subtask").build()))
-                .tag("tag")
-                .build();
-
+    void testDeleteWhenTaskDoesNotExist_ShouldThrowException() {
         when(tasksRepository.findById(Mockito.any(ObjectId.class))).thenReturn(Optional.empty());
 
         assertThrows(TaskException.class, () -> tasksService.delete(task.getId(), authenticatedUser));

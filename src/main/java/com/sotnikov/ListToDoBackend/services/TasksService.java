@@ -41,18 +41,18 @@ public class TasksService {
         return tasksRepository.insert(task);
     }
 
-    public Task update(Task updatedTask, User user){
-        Task taskWithSameId = getOne(updatedTask.getId(), user);
+    public Task update(String taskToBeUpdatedId, Task updatedTask, User user){
+        Task taskToBeUpdated = getOne(taskToBeUpdatedId, user);
 
-        taskWithSameId.setCompleted(updatedTask.isCompleted());
-        taskWithSameId.setPriority(updatedTask.getPriority());
-        taskWithSameId.setSubtasks(updatedTask.getSubtasks());
-        taskWithSameId.setDeadline(updatedTask.getDeadline());
-        taskWithSameId.setDescription(updatedTask.getDescription());
-        taskWithSameId.setTag(updatedTask.getTag());
-        taskWithSameId.setName(updatedTask.getName());
+        taskToBeUpdated.setCompleted(updatedTask.isCompleted());
+        taskToBeUpdated.setPriority(updatedTask.getPriority());
+        taskToBeUpdated.setSubtasks(updatedTask.getSubtasks());
+        taskToBeUpdated.setDeadline(updatedTask.getDeadline());
+        taskToBeUpdated.setDescription(updatedTask.getDescription());
+        taskToBeUpdated.setTag(updatedTask.getTag());
+        taskToBeUpdated.setName(updatedTask.getName());
 
-        return tasksRepository.save(taskWithSameId);
+        return tasksRepository.save(taskToBeUpdated);
     }
 
     public void delete(String taskId, User user){
