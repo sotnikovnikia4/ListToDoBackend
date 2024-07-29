@@ -7,6 +7,9 @@ import com.sotnikov.ListToDoBackend.models.User;
 import com.sotnikov.ListToDoBackend.services.UsersService;
 import com.sotnikov.ListToDoBackend.util.EditUserValidator;
 import com.sotnikov.ListToDoBackend.util.ErrorMessageMaker;
+import io.swagger.v3.oas.annotations.enums.SecuritySchemeType;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import io.swagger.v3.oas.annotations.security.SecurityScheme;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
@@ -18,6 +21,8 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequestMapping(value = "/users", produces = MediaType.APPLICATION_JSON_VALUE)
 @RequiredArgsConstructor
+@SecurityScheme(type = SecuritySchemeType.HTTP, scheme = "bearer", bearerFormat = "JWT", name = "bearerAuth")
+@SecurityRequirement(name = "bearerAuth")
 public class UsersController {
 
     private final ModelMapper modelMapper;
@@ -55,6 +60,9 @@ public class UsersController {
     }
 
     private UserDTO convertToUserDTO(User user){
-        return modelMapper.map(user, UserDTO.class);
+        UserDTO userDTO = modelMapper.map(user, UserDTO.class);
+        userDTO.setPassword(null);
+
+        return userDTO;
     }
 }

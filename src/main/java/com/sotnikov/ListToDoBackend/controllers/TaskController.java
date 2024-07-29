@@ -9,6 +9,11 @@ import com.sotnikov.ListToDoBackend.security.UserDetailsHolder;
 import com.sotnikov.ListToDoBackend.services.TasksService;
 import com.sotnikov.ListToDoBackend.util.ChangingTaskValidator;
 import com.sotnikov.ListToDoBackend.util.ErrorMessageMaker;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.enums.ParameterIn;
+import io.swagger.v3.oas.annotations.enums.SecuritySchemeType;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import io.swagger.v3.oas.annotations.security.SecurityScheme;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
@@ -22,6 +27,8 @@ import java.util.List;
 @RestController
 @RequestMapping("/tasks")
 @RequiredArgsConstructor
+@SecurityScheme(type = SecuritySchemeType.HTTP, scheme = "bearer", bearerFormat = "JWT", name = "bearerAuth")
+@SecurityRequirement(name = "bearerAuth")
 public class TaskController {
 
     private final TasksService tasksService;
@@ -33,6 +40,7 @@ public class TaskController {
 
     @GetMapping
     @ResponseStatus(HttpStatus.OK)
+    //@Parameter(name = "Authorization", required = true, description = "JWT token", in = ParameterIn.HEADER)
     public List<TaskDTO> getTasks(){
         User user = userDetailsHolder.getUserFromSecurityContext();
 
