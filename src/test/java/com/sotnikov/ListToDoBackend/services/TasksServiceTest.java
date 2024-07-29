@@ -11,6 +11,8 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.ArgumentMatchers;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -157,5 +159,23 @@ class TasksServiceTest {
         when(tasksRepository.findById(Mockito.any(ObjectId.class))).thenReturn(Optional.empty());
 
         assertThrows(TaskException.class, () -> tasksService.delete(task.getId(), authenticatedUser));
+    }
+
+    @ParameterizedTest
+    @ValueSource(booleans = {true, false})
+    void testSetCompleted_ReturnsNothing(boolean completed){
+        when(tasksRepository.findById(Mockito.any(ObjectId.class))).thenReturn(Optional.of(task));
+
+        tasksService.setCompleted(task.getId(), completed, authenticatedUser);
+
+        assertEquals(completed, task.isCompleted());
+    }
+
+    @ParameterizedTest
+    @ValueSource(booleans = {true, false})
+    void testSetCompleted_ShouldThrowException(boolean completed){
+        when(tasksRepository.findById(Mockito.any(ObjectId.class))).thenReturn(Optional.empty());
+
+        assertThrows(TaskException.class, () -> tasksService.setCompleted(task.getId(), completed, authenticatedUser));
     }
 }

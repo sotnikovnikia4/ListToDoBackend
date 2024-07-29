@@ -13,7 +13,7 @@ import java.util.Objects;
 
 @Component
 @RequiredArgsConstructor
-public class ChangingTaskValidator implements Validator {
+public class TaskValidator implements Validator {
     private final TasksService tasksService;
     private final UserDetailsHolder userDetailsHolder;
 

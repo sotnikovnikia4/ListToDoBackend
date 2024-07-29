@@ -7,6 +7,7 @@ import com.sotnikov.ListToDoBackend.repotitories.TasksRepository;
 import lombok.RequiredArgsConstructor;
 import org.bson.types.ObjectId;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
@@ -14,6 +15,7 @@ import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
+@Transactional(readOnly = true)
 public class TasksService {
 
     private final TasksRepository tasksRepository;
@@ -35,12 +37,14 @@ public class TasksService {
         return task.get();
     }
 
+    @Transactional
     public Task save(Task task, User user){
         enrich(task, user);
 
         return tasksRepository.insert(task);
     }
 
+    @Transactional
     public Task update(String taskToBeUpdatedId, Task updatedTask, User user){
         Task taskToBeUpdated = getOne(taskToBeUpdatedId, user);
 
@@ -55,10 +59,20 @@ public class TasksService {
         return tasksRepository.save(taskToBeUpdated);
     }
 
+    @Transactional
     public void delete(String taskId, User user){
         Task taskWithSameId = getOne(taskId, user);
 
         tasksRepository.delete(taskWithSameId);
+    }
+
+    @Transactional
+    public void setCompleted(String id, Boolean completed, User user) {
+        Task task = getOne(id, user);
+
+        task.setCompleted(completed);
+
+        tasksRepository.save(task);
     }
 
     private void enrich(Task task, User user){
@@ -74,4 +88,6 @@ public class TasksService {
             throw new TaskException("A task with the id does not exist");
         }
     }
+
+
 }

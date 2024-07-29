@@ -7,10 +7,8 @@ import com.sotnikov.ListToDoBackend.models.Task;
 import com.sotnikov.ListToDoBackend.models.User;
 import com.sotnikov.ListToDoBackend.security.UserDetailsHolder;
 import com.sotnikov.ListToDoBackend.services.TasksService;
-import com.sotnikov.ListToDoBackend.util.ChangingTaskValidator;
+import com.sotnikov.ListToDoBackend.util.TaskValidator;
 import com.sotnikov.ListToDoBackend.util.ErrorMessageMaker;
-import io.swagger.v3.oas.annotations.Parameter;
-import io.swagger.v3.oas.annotations.enums.ParameterIn;
 import io.swagger.v3.oas.annotations.enums.SecuritySchemeType;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.security.SecurityScheme;
@@ -34,13 +32,12 @@ public class TaskController {
     private final TasksService tasksService;
     private final ModelMapper modelMapper;
 
-    private final ChangingTaskValidator changingTaskValidator;
+    private final TaskValidator taskValidator;
 
     private final UserDetailsHolder userDetailsHolder;
 
     @GetMapping
     @ResponseStatus(HttpStatus.OK)
-    //@Parameter(name = "Authorization", required = true, description = "JWT token", in = ParameterIn.HEADER)
     public List<TaskDTO> getTasks(){
         User user = userDetailsHolder.getUserFromSecurityContext();
 
@@ -74,7 +71,7 @@ public class TaskController {
     public TaskDTO updateTask(@PathVariable(name = "id") String taskId, @RequestBody @Valid TaskDTO taskDTO, BindingResult bindingResult){
         Task updatedTask = convertToTask(taskDTO);
 
-        changingTaskValidator.validate(updatedTask, bindingResult);
+        taskValidator.validate(updatedTask, bindingResult);
 
         if(bindingResult.hasErrors()){
             throw new TaskException(ErrorMessageMaker.formErrorMessage(bindingResult));
@@ -87,6 +84,13 @@ public class TaskController {
     @ResponseStatus(HttpStatus.OK)
     public void deleteTask(@PathVariable(name = "id") String id){
         tasksService.delete(id, userDetailsHolder.getUserFromSecurityContext());
+    }
+
+    @PutMapping("/{id}/set-completed")
+    @ResponseStatus(HttpStatus.OK)
+    public void setCompleted(@PathVariable(name = "id") String id,
+                             @RequestParam(name = "completed") Boolean completed){
+        tasksService.setCompleted(id, completed, userDetailsHolder.getUserFromSecurityContext());
     }
 
     private Task convertToTask(CreationTaskDTO creationTaskDTO){

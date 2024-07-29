@@ -8,7 +8,7 @@ import com.sotnikov.ListToDoBackend.models.User;
 import com.sotnikov.ListToDoBackend.security.JWTUtil;
 import com.sotnikov.ListToDoBackend.security.UserDetailsHolder;
 import com.sotnikov.ListToDoBackend.services.TasksService;
-import com.sotnikov.ListToDoBackend.util.ChangingTaskValidator;
+import com.sotnikov.ListToDoBackend.util.TaskValidator;
 import org.bson.types.ObjectId;
 import org.hamcrest.CoreMatchers;
 import org.junit.jupiter.api.BeforeAll;
@@ -54,7 +54,7 @@ class TaskControllerTest {
     private TasksService tasksService;
 
     @MockBean
-    private ChangingTaskValidator changingTaskValidator;
+    private TaskValidator taskValidator;
 
     private TaskDTO taskDTO;
 
@@ -175,6 +175,18 @@ class TaskControllerTest {
 
         ResultActions resultActions = mockMvc.perform(delete("/tasks/" + taskDTO.getId() + "/delete")
                 .contentType(MediaType.APPLICATION_JSON));
+
+        resultActions.andExpect(status().isOk());
+    }
+
+    @Test
+    public void testSetCompleted_ReturnsNothing() throws Exception {
+        doNothing().when(tasksService).setCompleted(taskDTO.getId(), true, authenticatedUser);
+
+        ResultActions resultActions = mockMvc.perform(
+                put("/tasks/" + taskDTO.getId() + "/set-completed")
+                .param("completed", "true")
+        );
 
         resultActions.andExpect(status().isOk());
     }
