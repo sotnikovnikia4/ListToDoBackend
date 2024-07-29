@@ -31,6 +31,12 @@ public class UsersController {
 
     private final UserDetailsHolder userDetailsHolder;
 
+    @GetMapping("/get")
+    @ResponseStatus(HttpStatus.OK)
+    public UserDTO get(){
+        return convertToUserDTO(userDetailsHolder.getUserFromSecurityContext());
+    }
+
     @PatchMapping("/edit")
     @ResponseStatus(HttpStatus.OK)
     public UserDTO edit(@Valid @RequestBody UserDTO userDTO, BindingResult bindingResult){

@@ -11,6 +11,7 @@ import org.hamcrest.CoreMatchers;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentMatchers;
+import org.mockito.Mock;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.data.mongo.AutoConfigureDataMongo;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -26,6 +27,8 @@ import java.util.UUID;
 
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.mock;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 
 @WebMvcTest(controllers = UsersController.class)
@@ -50,11 +53,21 @@ class UsersControllerTest {
     @Autowired
     private ObjectMapper objectMapper;
 
+    private User authenticatedUser;
+
     @BeforeEach
     void setUp(){
-        User authenticatedUser = User.builder()
+        authenticatedUser = User.builder()
                 .id(UUID.fromString("02637f02-bbe9-4a5d-9e7e-6378c0c48b1b")).build();
         given(userDetailsHolder.getUserFromSecurityContext()).willReturn(authenticatedUser);
+    }
+
+    @Test
+    void testGetShouldReturnCurrentUser() throws Exception {
+        ResultActions resultActions = mockMvc.perform(get("/users/get"));
+
+        resultActions.andExpect(MockMvcResultMatchers.status().isOk())
+                .andExpect(MockMvcResultMatchers.jsonPath("$.login").value(authenticatedUser.getLogin()));
     }
 
     @Test
@@ -74,7 +87,7 @@ class UsersControllerTest {
 
         resultActions.andExpect(MockMvcResultMatchers.status().isOk())
                 .andExpect(MockMvcResultMatchers.jsonPath("$.login", CoreMatchers.is(userDTO.getLogin())))
-                .andExpect(MockMvcResultMatchers.jsonPath("$.password", CoreMatchers.is(userDTO.getPassword())))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.password", CoreMatchers.nullValue()))
                 .andExpect(MockMvcResultMatchers.jsonPath("$.name", CoreMatchers.is(userDTO.getName())));
     }
 
