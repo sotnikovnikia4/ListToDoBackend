@@ -29,19 +29,13 @@ public class JWTFilter extends OncePerRequestFilter {
     private final UserDetailsService userDetailsService;
     private final ObjectMapper objectMapper;
 
-    private String token;
-    private HttpServletResponse response;
-
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
         String authHeader = request.getHeader("Authorization");
 
-        //this.request = request;
-        this.response = response;
-
         if (headerIsCorrect(authHeader)) {
-            this.token = authHeader.substring(7);
-            checkJWTAndSetAuthentication();
+            String token = authHeader.substring(7);
+            checkJWTAndSetAuthentication(token, response);
         }
         if(response.getStatus() != HttpServletResponse.SC_UNAUTHORIZED)
             filterChain.doFilter(request, response);
@@ -51,15 +45,15 @@ public class JWTFilter extends OncePerRequestFilter {
         return authHeader != null && !authHeader.isBlank() && authHeader.startsWith("Bearer ");
     }
 
-    private void checkJWTAndSetAuthentication() throws IOException {
+    private void checkJWTAndSetAuthentication(String token, HttpServletResponse response) throws IOException {
         if (!token.isBlank()) {
-            trySetAuthenticationOtherwiseSendErrorResponse();
+            trySetAuthenticationOtherwiseSendErrorResponse(token, response);
         }
     }
 
-    private void trySetAuthenticationOtherwiseSendErrorResponse() throws IOException {
+    private void trySetAuthenticationOtherwiseSendErrorResponse(String token, HttpServletResponse response) throws IOException {
         try {
-            setAuthentication();
+            setAuthentication(token);
         } catch (JWTVerificationException | UsernameNotFoundException e) {
             response.setStatus(HttpStatus.UNAUTHORIZED.value());
             response.setContentType(MediaType.APPLICATION_JSON_VALUE);
@@ -67,7 +61,7 @@ public class JWTFilter extends OncePerRequestFilter {
         }
     }
 
-    private void setAuthentication(){
+    private void setAuthentication(String token){
         String username = jwtUtil.validateTokenAndRetrieveClaim(token);
         UserDetails userDetails = userDetailsService.loadUserByUsername(username);
 
