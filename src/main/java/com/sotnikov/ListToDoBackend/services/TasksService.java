@@ -7,7 +7,8 @@ import com.sotnikov.ListToDoBackend.models.QTask;
 import com.sotnikov.ListToDoBackend.models.Task;
 import com.sotnikov.ListToDoBackend.models.User;
 import com.sotnikov.ListToDoBackend.repotitories.TasksRepository;
-import com.sotnikov.ListToDoBackend.util.FilterTaskToPredicateConverter;
+import com.sotnikov.ListToDoBackend.util.filtertaskconverter.FilterTaskToPredicateConverter;
+import com.sotnikov.ListToDoBackend.util.filtertaskconverter.OneTypeConverter;
 import lombok.RequiredArgsConstructor;
 import org.bson.types.ObjectId;
 import org.springframework.stereotype.Service;
@@ -111,7 +112,7 @@ public class TasksService {
         filters.add(
                 FilterTask.builder()
                         .field("userId")
-                        .operator(converterToPredicate.EQUALS)
+                        .operator(OneTypeConverter.EQUALS)
                         .value(userId.toString())
                         .build()
         );
