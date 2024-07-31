@@ -1,17 +1,19 @@
 package com.sotnikov.ListToDoBackend.services;
 
+import com.querydsl.core.types.Predicate;
+import com.sotnikov.ListToDoBackend.dto.FilterTask;
 import com.sotnikov.ListToDoBackend.exceptions.TaskException;
+import com.sotnikov.ListToDoBackend.models.QTask;
 import com.sotnikov.ListToDoBackend.models.Task;
 import com.sotnikov.ListToDoBackend.models.User;
 import com.sotnikov.ListToDoBackend.repotitories.TasksRepository;
+import com.sotnikov.ListToDoBackend.util.FilterTaskToPredicateConverter;
 import lombok.RequiredArgsConstructor;
 import org.bson.types.ObjectId;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 
 @Service
 @RequiredArgsConstructor
@@ -19,22 +21,10 @@ import java.util.UUID;
 public class TasksService {
 
     private final TasksRepository tasksRepository;
+    private final FilterTaskToPredicateConverter converterToPredicate;
 
     public List<Task> getTasks(UUID userId){
         return tasksRepository.findByUserId(userId);
-    }
-
-    public Task getOne(String id, User user){
-        Optional<Task> task = tasksRepository.findById(convertToObjectId(id));
-
-        if(task.isEmpty()){
-            throw new TaskException("This task does not exist!");
-        }
-        else if(!task.get().getUserId().equals(user.getId())){
-            throw new TaskException("The task does not belong to this user!");
-        }
-
-        return task.get();
     }
 
     @Transactional
@@ -42,6 +32,10 @@ public class TasksService {
         enrich(task, user);
 
         return tasksRepository.insert(task);
+    }
+
+    private void enrich(Task task, User user){
+        task.setUserId(user.getId());
     }
 
     @Transactional
@@ -75,9 +69,29 @@ public class TasksService {
         tasksRepository.save(task);
     }
 
-    private void enrich(Task task, User user){
+    public List<Task> test(UUID id) {
+        QTask qTask = QTask.task;
 
-        task.setUserId(user.getId());
+        Predicate predicate = qTask.userId.eq(id).and(qTask.completed.eq(true));
+
+        List<Task> tasks = new ArrayList<>();
+
+        tasksRepository.findAll(predicate).forEach(tasks::add);
+
+        return tasks;
+    }
+
+    public Task getOne(String id, User user){
+        Optional<Task> task = tasksRepository.findById(convertToObjectId(id));
+
+        if(task.isEmpty()){
+            throw new TaskException("This task does not exist!");
+        }
+        else if(!task.get().getUserId().equals(user.getId())){
+            throw new TaskException("The task does not belong to this user!");
+        }
+
+        return task.get();
     }
 
     private ObjectId convertToObjectId(String id){
@@ -89,5 +103,23 @@ public class TasksService {
         }
     }
 
+    public List<Task> getTasks(UUID userId, List<FilterTask> filters) {
+        if(filters == null){
+            filters = new ArrayList<>();
+        }
 
+        filters.add(
+                FilterTask.builder()
+                        .field("userId")
+                        .operator(converterToPredicate.EQUALS)
+                        .value(userId.toString())
+                        .build()
+        );
+
+        List<Task> tasks = new ArrayList<>();
+
+        tasksRepository.findAll(converterToPredicate.apply(filters)).forEach(tasks::add);
+
+        return tasks;
+    }
 }

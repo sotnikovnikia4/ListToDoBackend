@@ -2,6 +2,7 @@ package com.sotnikov.ListToDoBackend.controllers;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sotnikov.ListToDoBackend.dto.CreationTaskDTO;
+import com.sotnikov.ListToDoBackend.dto.FilterTask;
 import com.sotnikov.ListToDoBackend.dto.TaskDTO;
 import com.sotnikov.ListToDoBackend.models.Task;
 import com.sotnikov.ListToDoBackend.models.User;
@@ -29,6 +30,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.doNothing;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
@@ -59,6 +61,7 @@ class TaskControllerTest {
     private TaskDTO taskDTO;
 
     private static User authenticatedUser;
+    private static List<Task> tasks;
 
     @BeforeAll
     static void setUpBeforeAll(){
@@ -68,6 +71,24 @@ class TaskControllerTest {
                 .login("123")
                 .password("123")
                 .build();
+
+        Task task1 = Task.builder()
+                .name("task1")
+                .userId(authenticatedUser.getId())
+                .build();
+
+        Task task2 = Task.builder()
+                .name("task2")
+                .userId(authenticatedUser.getId())
+                .build();
+        Task task3 = Task.builder()
+                .name("task3")
+                .userId(authenticatedUser.getId())
+                .completed(true)
+                .priority(1)
+                .build();
+
+        tasks = List.of(task1, task2, task3);
     }
 
     @BeforeEach
@@ -85,29 +106,14 @@ class TaskControllerTest {
     }
 
     @Test
-    public void testGetTasks_ReturnsList() throws Exception {
-        Task task1 = Task.builder()
-                .name("task1")
-                .userId(authenticatedUser.getId())
-                .build();
+    public void testGetAllTasks_ReturnsList() throws Exception {
 
-        Task task2 = Task.builder()
-                .name("task2")
-                .userId(authenticatedUser.getId())
-                .build();
-        Task task3 = Task.builder()
-                .name("task3")
-                .userId(authenticatedUser.getId())
-                .completed(true)
-                .priority(1)
-                .build();
+        given(tasksService.getTasks(ArgumentMatchers.any())).willReturn(tasks);
 
-        given(tasksService.getTasks(ArgumentMatchers.any())).willReturn(List.of(task1, task2, task3));
-
-        ResultActions resultActions = mockMvc.perform(get("/tasks"));
+        ResultActions resultActions = mockMvc.perform(get("/tasks/get-all"));
 
         resultActions.andExpect(status().isOk())
-                .andExpect(jsonPath("$.size()", CoreMatchers.is(3)));
+                .andExpect(jsonPath("$.size()", CoreMatchers.is(tasks.size())));
     }
 
     @Test
@@ -186,6 +192,21 @@ class TaskControllerTest {
         ResultActions resultActions = mockMvc.perform(
                 put("/tasks/" + taskDTO.getId() + "/set-completed")
                 .param("completed", "true")
+        );
+
+        resultActions.andExpect(status().isOk());
+    }
+
+    @Test
+    public void testGetTasksWithCriteria_ReturnsListTaskDTO() throws Exception{
+        FilterTask filterTask = FilterTask.builder().build();
+
+        given(tasksService.getTasks(authenticatedUser.getId(), List.of(filterTask))).willAnswer(e -> tasks);
+
+        ResultActions resultActions = mockMvc.perform(
+                get("/tasks/get-with-criteria")
+                        .content(objectMapper.writeValueAsString(List.of(filterTask)))
+                        .contentType(MediaType.APPLICATION_JSON)
         );
 
         resultActions.andExpect(status().isOk());

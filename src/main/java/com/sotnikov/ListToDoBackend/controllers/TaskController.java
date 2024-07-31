@@ -1,6 +1,7 @@
 package com.sotnikov.ListToDoBackend.controllers;
 
 import com.sotnikov.ListToDoBackend.dto.CreationTaskDTO;
+import com.sotnikov.ListToDoBackend.dto.FilterTask;
 import com.sotnikov.ListToDoBackend.dto.TaskDTO;
 import com.sotnikov.ListToDoBackend.exceptions.TaskException;
 import com.sotnikov.ListToDoBackend.models.Task;
@@ -36,12 +37,20 @@ public class TaskController {
 
     private final UserDetailsHolder userDetailsHolder;
 
-    @GetMapping
+    @GetMapping("/get-all")
     @ResponseStatus(HttpStatus.OK)
-    public List<TaskDTO> getTasks(){
+    public List<TaskDTO> getAllTasks(){
         User user = userDetailsHolder.getUserFromSecurityContext();
 
         return tasksService.getTasks(user.getId()).stream().map(this::convertToTaskDTO).toList();
+    }
+
+    @GetMapping("/get-with-criteria")
+    @ResponseStatus(HttpStatus.OK)
+    public List<TaskDTO> getTasksWithCriteria(@RequestBody List<FilterTask> filterTask){
+        User user = userDetailsHolder.getUserFromSecurityContext();
+
+        return tasksService.getTasks(user.getId(), filterTask).stream().map(this::convertToTaskDTO).toList();
     }
 
     @GetMapping("/{id}")
