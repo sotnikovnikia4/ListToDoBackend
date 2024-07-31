@@ -199,12 +199,12 @@ class TaskControllerTest {
 
     @Test
     public void testGetTasksWithCriteria_ReturnsListTaskDTO() throws Exception{
-        FilterTask filterTask = FilterTask.builder().build();
+        FilterTask filterTask = FilterTask.builder().field("field").operator("operator").value("value").build();
 
         given(tasksService.getTasks(authenticatedUser.getId(), List.of(filterTask))).willAnswer(e -> tasks);
 
         ResultActions resultActions = mockMvc.perform(
-                get("/tasks/get-with-criteria")
+                get("/tasks/get-all-with-criteria")
                         .content(objectMapper.writeValueAsString(List.of(filterTask)))
                         .contentType(MediaType.APPLICATION_JSON)
         );

@@ -16,6 +16,7 @@ import io.swagger.v3.oas.annotations.security.SecurityScheme;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
@@ -45,10 +46,14 @@ public class TaskController {
         return tasksService.getTasks(user.getId()).stream().map(this::convertToTaskDTO).toList();
     }
 
-    @GetMapping("/get-with-criteria")
+    @GetMapping("/get-all-with-criteria")
     @ResponseStatus(HttpStatus.OK)
-    public List<TaskDTO> getTasksWithCriteria(@RequestBody List<FilterTask> filterTask){
+    public List<TaskDTO> getTasksWithCriteria(@Valid @RequestBody List<FilterTask> filterTask, BindingResult bindingResult){
         User user = userDetailsHolder.getUserFromSecurityContext();
+
+        if(bindingResult.hasErrors()){
+            throw new TaskException(ErrorMessageMaker.formErrorMessage(bindingResult));
+        }
 
         return tasksService.getTasks(user.getId(), filterTask).stream().map(this::convertToTaskDTO).toList();
     }

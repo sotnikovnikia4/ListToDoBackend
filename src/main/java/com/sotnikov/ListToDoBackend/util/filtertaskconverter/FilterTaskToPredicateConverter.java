@@ -8,6 +8,7 @@ import com.sotnikov.ListToDoBackend.models.QTask;
 import org.springframework.stereotype.Component;
 
 import java.lang.reflect.Field;
+import java.time.format.DateTimeParseException;
 import java.util.List;
 import java.util.function.Function;
 
@@ -54,6 +55,12 @@ public class FilterTaskToPredicateConverter implements Function<List<FilterTask>
         }
         catch (NoSuchFieldException e){
             throw new TaskException("The field does not exist: " + e.getMessage());
+        }
+        catch (NumberFormatException e){
+            throw new TaskException("Value is not a number for field of numeric type");
+        }
+        catch (DateTimeParseException e){
+            throw new TaskException("Error in parsing value to localDateTime format");
         }
         catch (Exception e){
             throw new RuntimeException(e);
