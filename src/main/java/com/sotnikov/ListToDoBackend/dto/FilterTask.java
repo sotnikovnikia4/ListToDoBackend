@@ -17,4 +17,7 @@ public class FilterTask {
     private String operator;
     @NotBlank
     private String value;
+
+    private boolean sorting = false;
+    private boolean descendingOrder = false;
 }

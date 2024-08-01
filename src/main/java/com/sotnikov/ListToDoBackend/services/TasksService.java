@@ -11,10 +11,16 @@ import com.sotnikov.ListToDoBackend.util.filtertaskconverter.FilterTaskToPredica
 import com.sotnikov.ListToDoBackend.util.filtertaskconverter.OneTypeConverter;
 import lombok.RequiredArgsConstructor;
 import org.bson.types.ObjectId;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -105,9 +111,25 @@ public class TasksService {
     }
 
     public List<Task> getTasks(UUID userId, List<FilterTask> filters) {
-        if(filters == null){
-            filters = new ArrayList<>();
-        }
+        Sort sort = getSortAndAddUserFilter(userId, filters);
+
+        Predicate predicate = converterToPredicate.apply(filters);
+
+        List<Task> tasks = new ArrayList<>();
+        tasksRepository.findAll(predicate, sort).forEach(tasks::add);
+        return tasks;
+    }
+
+    public Page<Task> getTasks(UUID userId, List<FilterTask> filters, Integer numberOfPage, Integer itemsPerPage) {
+        Sort sort = getSortAndAddUserFilter(userId, filters);
+
+        Predicate predicate = converterToPredicate.apply(filters);
+
+        return tasksRepository.findAll(predicate, PageRequest.of(numberOfPage, itemsPerPage, sort));
+    }
+
+    private Sort getSortAndAddUserFilter(UUID userId, List<FilterTask> filters){
+        Sort sort = getSort(filters);
 
         filters.add(
                 FilterTask.builder()
@@ -117,10 +139,22 @@ public class TasksService {
                         .build()
         );
 
-        List<Task> tasks = new ArrayList<>();
+        return sort;
+    }
 
-        tasksRepository.findAll(converterToPredicate.apply(filters)).forEach(tasks::add);
+    private Sort getSort(List<FilterTask> filters){
+        Sort sort = Sort.unsorted();
 
-        return tasks;
+        for(FilterTask f : filters){
+            if(f.isSorting()){
+                Sort s = Sort.by(f.getField());
+                if(f.isDescendingOrder()){
+                    s = s.descending();
+                }
+                sort = sort.and(s);
+            }
+        }
+
+        return sort;
     }
 }

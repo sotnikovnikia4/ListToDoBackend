@@ -197,20 +197,20 @@ class TaskControllerTest {
         resultActions.andExpect(status().isOk());
     }
 
-    @Test
-    public void testGetTasksWithCriteria_ReturnsListTaskDTO() throws Exception{
-        FilterTask filterTask = FilterTask.builder().field("field").operator("operator").value("value").build();
-
-        given(tasksService.getTasks(authenticatedUser.getId(), List.of(filterTask))).willAnswer(e -> tasks);
-
-        ResultActions resultActions = mockMvc.perform(
-                get("/tasks/get-all-with-criteria")
-                        .content(objectMapper.writeValueAsString(List.of(filterTask)))
-                        .contentType(MediaType.APPLICATION_JSON)
-        );
-
-        resultActions.andExpect(status().isOk());
-    }
+//    @Test
+//    public void testGetTasksWithCriteria_ReturnsListTaskDTO() throws Exception{
+//        FilterTask filterTask = FilterTask.builder().field("field").operator("operator").value("value").build();
+//
+//        given(tasksService.getTasks(authenticatedUser.getId(), List.of(filterTask))).willAnswer(e -> tasks);
+//
+//        ResultActions resultActions = mockMvc.perform(
+//                get("/tasks/get-all-with-criteria")
+//                        .content(objectMapper.writeValueAsString(List.of(filterTask)))
+//                        .contentType(MediaType.APPLICATION_JSON)
+//        );
+//
+//        resultActions.andExpect(status().isOk());
+//    }
 }
 
 

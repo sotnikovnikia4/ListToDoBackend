@@ -15,6 +15,7 @@ public abstract class OneTypeConverter<T extends Path<?>>{
     public static final String GREATER_THAN = "GREATER_THAN";
     public static final String CONTAINS_IGNORE_CASE = "CONTAINS_IGNORE_CASE";
     public static final String EQUALS_IGNORE_CASE = "EQUALS_IGNORE_CASE";
+    public static final String NONE = "NONE";
 
     private final Class<T> pathType;
     private final Class<?> typeInPath;
@@ -58,6 +59,9 @@ public abstract class OneTypeConverter<T extends Path<?>>{
                 }
                 case CONTAINS_IGNORE_CASE:{
                     predicate = doSome(predicate, () -> doContainsIgnoreCase(path, filter));
+                    break;
+                }
+                case NONE:{
                     break;
                 }
                 default:{

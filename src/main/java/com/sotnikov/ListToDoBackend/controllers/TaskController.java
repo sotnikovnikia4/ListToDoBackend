@@ -8,21 +8,23 @@ import com.sotnikov.ListToDoBackend.models.Task;
 import com.sotnikov.ListToDoBackend.models.User;
 import com.sotnikov.ListToDoBackend.security.UserDetailsHolder;
 import com.sotnikov.ListToDoBackend.services.TasksService;
-import com.sotnikov.ListToDoBackend.util.TaskValidator;
 import com.sotnikov.ListToDoBackend.util.ErrorMessageMaker;
+import com.sotnikov.ListToDoBackend.util.TaskValidator;
 import io.swagger.v3.oas.annotations.enums.SecuritySchemeType;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.security.SecurityScheme;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
-import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/tasks")
@@ -40,22 +42,47 @@ public class TaskController {
 
     @GetMapping("/get-all")
     @ResponseStatus(HttpStatus.OK)
-    public List<TaskDTO> getAllTasks(){
+    public List<TaskDTO> getAllTasks(@Valid @RequestBody List<FilterTask> filters, BindingResult bindingResult){
         User user = userDetailsHolder.getUserFromSecurityContext();
 
-        return tasksService.getTasks(user.getId()).stream().map(this::convertToTaskDTO).toList();
-    }
-
-    @GetMapping("/get-all-with-criteria")
-    @ResponseStatus(HttpStatus.OK)
-    public List<TaskDTO> getTasksWithCriteria(@Valid @RequestBody List<FilterTask> filterTask, BindingResult bindingResult){
-        User user = userDetailsHolder.getUserFromSecurityContext();
+        if(filters == null){
+            filters = new ArrayList<>();
+        }
 
         if(bindingResult.hasErrors()){
             throw new TaskException(ErrorMessageMaker.formErrorMessage(bindingResult));
         }
 
-        return tasksService.getTasks(user.getId(), filterTask).stream().map(this::convertToTaskDTO).toList();
+        List<Task> tasks = tasksService.getTasks(user.getId(), filters);
+
+        return tasks.stream().map(this::convertToTaskDTO).toList();
+    }
+
+    @GetMapping("/get-all/pageable")
+    @ResponseStatus(HttpStatus.OK)
+    public Map<String, Object> getTasksWithCriteria(
+            @RequestParam(name = "numberOfPage") Integer numberOfPage,
+            @RequestParam(name = "itemsPerPage") Integer itemsPerPage,
+            @Valid @RequestBody List<FilterTask> filters, BindingResult bindingResult){
+        User user = userDetailsHolder.getUserFromSecurityContext();
+
+        if(filters == null){
+            filters = new ArrayList<>();
+        }
+
+        if(bindingResult.hasErrors()){
+            throw new TaskException(ErrorMessageMaker.formErrorMessage(bindingResult));
+        }
+
+        Page<Task> page = tasksService.getTasks(user.getId(), filters, numberOfPage, itemsPerPage);
+        return Map.of(
+                "currentPage", page.getNumber(),
+                "numberOfElements", page.getNumberOfElements(),
+                "pageSize", page.getSize(),
+                "totalPages", page.getTotalPages(),
+                "totalElements", page.getTotalElements(),
+                "result", page.stream().map(this::convertToTaskDTO).toList()
+        );
     }
 
     @GetMapping("/{id}")
