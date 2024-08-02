@@ -42,7 +42,7 @@ public class TaskController {
 
     @GetMapping("/get-all")
     @ResponseStatus(HttpStatus.OK)
-    public List<TaskDTO> getAllTasks(@Valid @RequestBody List<FilterTask> filters, BindingResult bindingResult){
+    public List<TaskDTO> getAllTasks(@Valid @RequestBody(required = false) List<FilterTask> filters, BindingResult bindingResult){
         User user = userDetailsHolder.getUserFromSecurityContext();
 
         if(filters == null){
@@ -63,7 +63,7 @@ public class TaskController {
     public Map<String, Object> getTasksWithCriteria(
             @RequestParam(name = "numberOfPage") Integer numberOfPage,
             @RequestParam(name = "itemsPerPage") Integer itemsPerPage,
-            @Valid @RequestBody List<FilterTask> filters, BindingResult bindingResult){
+            @Valid @RequestBody(required = false) List<FilterTask> filters, BindingResult bindingResult){
         User user = userDetailsHolder.getUserFromSecurityContext();
 
         if(filters == null){
@@ -81,7 +81,7 @@ public class TaskController {
                 "pageSize", page.getSize(),
                 "totalPages", page.getTotalPages(),
                 "totalElements", page.getTotalElements(),
-                "result", page.stream().map(this::convertToTaskDTO).toList()
+                "content", page.stream().map(this::convertToTaskDTO).toList()
         );
     }
 

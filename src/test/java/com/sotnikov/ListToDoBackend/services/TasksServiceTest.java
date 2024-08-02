@@ -1,10 +1,15 @@
 package com.sotnikov.ListToDoBackend.services;
 
+import com.querydsl.core.types.Predicate;
+import com.querydsl.core.types.dsl.Expressions;
+import com.sotnikov.ListToDoBackend.dto.FilterTask;
 import com.sotnikov.ListToDoBackend.exceptions.TaskException;
 import com.sotnikov.ListToDoBackend.models.Subtask;
 import com.sotnikov.ListToDoBackend.models.Task;
 import com.sotnikov.ListToDoBackend.models.User;
 import com.sotnikov.ListToDoBackend.repotitories.TasksRepository;
+import com.sotnikov.ListToDoBackend.util.filtertaskconverter.FilterTaskToPredicateConverter;
+import com.sotnikov.ListToDoBackend.util.filtertaskconverter.OneTypeConverter;
 import org.assertj.core.api.Assertions;
 import org.bson.types.ObjectId;
 import org.junit.jupiter.api.BeforeAll;
@@ -18,13 +23,17 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.*;
 
+import java.lang.reflect.Method;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.when;
 
@@ -33,10 +42,14 @@ class TasksServiceTest {
     @Mock
     private TasksRepository tasksRepository;
 
+    @Mock
+    private FilterTaskToPredicateConverter converterToPredicate;
+
     @InjectMocks
     private TasksService tasksService;
 
     private static User authenticatedUser;
+    private static List<Task> tasks;
 
     private Task task;
 
@@ -48,6 +61,24 @@ class TasksServiceTest {
                 .login("123")
                 .password("123")
                 .build();
+
+        Task task1 = Task.builder()
+                .name("task1")
+                .userId(authenticatedUser.getId())
+                .build();
+
+        Task task2 = Task.builder()
+                .name("task2")
+                .userId(authenticatedUser.getId())
+                .build();
+        Task task3 = Task.builder()
+                .name("task3")
+                .userId(authenticatedUser.getId())
+                .completed(true)
+                .priority(1)
+                .build();
+
+        tasks = List.of(task1, task2, task3);
     }
 
     @BeforeEach
@@ -65,15 +96,6 @@ class TasksServiceTest {
                 .subtasks(List.of(Subtask.builder().name("subtask").build()))
                 .tag("tag")
                 .build();
-    }
-
-    @Test
-    void testGetTasks_ShouldReturnNotNull() {
-        when(tasksRepository.findByUserId(Mockito.any(UUID.class))).thenReturn(List.of(new Task()));
-
-        List<Task> tasks = tasksService.getTasks(UUID.randomUUID());
-
-        Assertions.assertThat(tasks.size()).isEqualTo(1);
     }
 
     @Test
@@ -177,5 +199,97 @@ class TasksServiceTest {
         when(tasksRepository.findById(Mockito.any(ObjectId.class))).thenReturn(Optional.empty());
 
         assertThrows(TaskException.class, () -> tasksService.setCompleted(task.getId(), completed, authenticatedUser));
+    }
+
+    @Test
+    void testGetTasksWithNoPagination_ShouldReturnList(){
+        when(converterToPredicate.apply(any())).thenReturn(Expressions.stringPath("name").eq("name"));
+        when(tasksRepository.findAll(any(Predicate.class), any(Sort.class))).thenReturn(tasks);
+
+        List<Task> result = tasksService.getTasks(authenticatedUser.getId(), new ArrayList<>());
+        assertEquals(tasks.size(), result.size());
+    }
+
+    @Test
+    void testGetTasksWithNoPagination_ShouldReturnPage(){
+        when(converterToPredicate.apply(any())).thenReturn(Expressions.stringPath("name").eq("name"));
+        when(tasksRepository.findAll(any(Predicate.class), any(Pageable.class))).thenAnswer(
+                e -> new PageImpl<>(tasks, PageRequest.of(0, tasks.size()), tasks.size())
+        );
+
+        Page<Task> result = tasksService.getTasks(authenticatedUser.getId(), new ArrayList<>(), 0, tasks.size());
+        assertEquals(tasks.size(), result.getSize());
+    }
+
+    @Test
+    void testAddUserFilter_ShouldAddFilterToList() throws Exception{
+        Method method = tasksService.getClass().getDeclaredMethod("addUserFilter", UUID.class, List.class);
+        method.setAccessible(true);
+
+        List<FilterTask> filters = new ArrayList<>();
+        method.invoke(tasksService, authenticatedUser.getId(), filters);
+
+        assertEquals(1, filters.size());
+        assertEquals("userId", filters.get(0).getField());
+        assertEquals(OneTypeConverter.EQUALS, filters.get(0).getOperator());
+        assertEquals(authenticatedUser.getId().toString(), filters.get(0).getValue());
+    }
+
+    @Test
+    void testGetSortWhenIsNotSortingField_ShouldReturnUnsorted() throws Exception{
+        Method method = tasksService.getClass().getDeclaredMethod("getSort", List.class);
+        method.setAccessible(true);
+
+        List<FilterTask> filters = new ArrayList<>();
+        filters.add(FilterTask.builder()
+                        .field("field")
+                        .sorting(false)
+                        .descendingOrder(false)
+                        .value("value")
+                        .operator(OneTypeConverter.NONE)
+                .build());
+
+        Sort sort = (Sort)method.invoke(tasksService, filters);
+
+        assertTrue(sort.isUnsorted());
+    }
+    @Test
+    void testGetSort_ShouldReturnSortedInAscendingOrder() throws Exception{
+        Method method = tasksService.getClass().getDeclaredMethod("getSort", List.class);
+        method.setAccessible(true);
+
+        List<FilterTask> filters = new ArrayList<>();
+        filters.add(FilterTask.builder()
+                .field("field")
+                .sorting(true)
+                .descendingOrder(false)
+                .value("value")
+                .operator(OneTypeConverter.NONE)
+                .build());
+
+        Sort sort = (Sort)method.invoke(tasksService, filters);
+
+        assertTrue(sort.isSorted());
+        assertEquals(Sort.Order.asc("field"), sort.getOrderFor("field"));
+    }
+
+    @Test
+    void testGetSort_ShouldReturnSortedInDescendingOrder() throws Exception{
+        Method method = tasksService.getClass().getDeclaredMethod("getSort", List.class);
+        method.setAccessible(true);
+
+        List<FilterTask> filters = new ArrayList<>();
+        filters.add(FilterTask.builder()
+                .field("field")
+                .sorting(true)
+                .descendingOrder(true)
+                .value("value")
+                .operator(OneTypeConverter.NONE)
+                .build());
+
+        Sort sort = (Sort)method.invoke(tasksService, filters);
+
+        assertTrue(sort.isSorted());
+        assertEquals(Sort.Order.desc("field"), sort.getOrderFor("field"));
     }
 }

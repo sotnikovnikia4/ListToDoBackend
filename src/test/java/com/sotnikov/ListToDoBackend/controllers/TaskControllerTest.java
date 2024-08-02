@@ -2,7 +2,6 @@ package com.sotnikov.ListToDoBackend.controllers;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sotnikov.ListToDoBackend.dto.CreationTaskDTO;
-import com.sotnikov.ListToDoBackend.dto.FilterTask;
 import com.sotnikov.ListToDoBackend.dto.TaskDTO;
 import com.sotnikov.ListToDoBackend.models.Task;
 import com.sotnikov.ListToDoBackend.models.User;
@@ -21,16 +20,21 @@ import org.springframework.boot.test.autoconfigure.data.mongo.AutoConfigureDataM
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
+import org.springframework.util.MultiValueMap;
+import org.springframework.util.MultiValueMapAdapter;
 
 import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.doNothing;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
@@ -108,12 +112,30 @@ class TaskControllerTest {
     @Test
     public void testGetAllTasks_ReturnsList() throws Exception {
 
-        given(tasksService.getTasks(ArgumentMatchers.any())).willReturn(tasks);
+        given(tasksService.getTasks(authenticatedUser.getId(), Collections.emptyList())).willAnswer(e -> tasks);
 
         ResultActions resultActions = mockMvc.perform(get("/tasks/get-all"));
 
         resultActions.andExpect(status().isOk())
                 .andExpect(jsonPath("$.size()", CoreMatchers.is(tasks.size())));
+    }
+
+    @Test
+    public void testGetAllTasks_ReturnsPage() throws Exception {
+
+        given(tasksService.getTasks(authenticatedUser.getId(), Collections.emptyList(),0, 5)).willAnswer(
+                e -> new PageImpl<>(tasks, PageRequest.of(e.getArgument(2), e.getArgument(3)), tasks.size())
+        );
+
+        ResultActions resultActions = mockMvc.perform(get("/tasks/get-all/pageable").params(
+                new MultiValueMapAdapter<>(Map.of(
+                        "numberOfPage", List.of("0"),
+                        "itemsPerPage", List.of("5")
+                ))
+        ));
+
+        resultActions.andExpect(status().isOk())
+                .andExpect(jsonPath("$.numberOfElements", CoreMatchers.is(3)));
     }
 
     @Test

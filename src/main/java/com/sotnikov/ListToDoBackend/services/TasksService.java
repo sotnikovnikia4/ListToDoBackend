@@ -9,6 +9,7 @@ import com.sotnikov.ListToDoBackend.models.User;
 import com.sotnikov.ListToDoBackend.repotitories.TasksRepository;
 import com.sotnikov.ListToDoBackend.util.filtertaskconverter.FilterTaskToPredicateConverter;
 import com.sotnikov.ListToDoBackend.util.filtertaskconverter.OneTypeConverter;
+import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import org.bson.types.ObjectId;
 import org.springframework.data.domain.Page;
@@ -29,10 +30,6 @@ public class TasksService {
 
     private final TasksRepository tasksRepository;
     private final FilterTaskToPredicateConverter converterToPredicate;
-
-    public List<Task> getTasks(UUID userId){
-        return tasksRepository.findByUserId(userId);
-    }
 
     @Transactional
     public Task save(Task task, User user){
@@ -111,7 +108,8 @@ public class TasksService {
     }
 
     public List<Task> getTasks(UUID userId, List<FilterTask> filters) {
-        Sort sort = getSortAndAddUserFilter(userId, filters);
+        Sort sort = getSort(filters);
+        addUserFilter(userId, filters);
 
         Predicate predicate = converterToPredicate.apply(filters);
 
@@ -121,16 +119,15 @@ public class TasksService {
     }
 
     public Page<Task> getTasks(UUID userId, List<FilterTask> filters, Integer numberOfPage, Integer itemsPerPage) {
-        Sort sort = getSortAndAddUserFilter(userId, filters);
+        Sort sort = getSort(filters);
+        addUserFilter(userId, filters);
 
         Predicate predicate = converterToPredicate.apply(filters);
 
         return tasksRepository.findAll(predicate, PageRequest.of(numberOfPage, itemsPerPage, sort));
     }
 
-    private Sort getSortAndAddUserFilter(UUID userId, List<FilterTask> filters){
-        Sort sort = getSort(filters);
-
+    private void addUserFilter(UUID userId, List<FilterTask> filters) {
         filters.add(
                 FilterTask.builder()
                         .field("userId")
@@ -138,8 +135,6 @@ public class TasksService {
                         .value(userId.toString())
                         .build()
         );
-
-        return sort;
     }
 
     private Sort getSort(List<FilterTask> filters){
