@@ -2,6 +2,7 @@ package com.sotnikov.ListToDoBackend.controllers;
 
 import com.sotnikov.ListToDoBackend.dto.CreationTaskDTO;
 import com.sotnikov.ListToDoBackend.dto.FilterTask;
+import com.sotnikov.ListToDoBackend.dto.PageDTO;
 import com.sotnikov.ListToDoBackend.dto.TaskDTO;
 import com.sotnikov.ListToDoBackend.exceptions.TaskException;
 import com.sotnikov.ListToDoBackend.models.Task;
@@ -60,7 +61,7 @@ public class TaskController {
 
     @GetMapping("/get-all/pageable")
     @ResponseStatus(HttpStatus.OK)
-    public Map<String, Object> getTasksWithCriteria(
+    public PageDTO<TaskDTO> getAllTasksWithPagination(
             @RequestParam(name = "numberOfPage") Integer numberOfPage,
             @RequestParam(name = "itemsPerPage") Integer itemsPerPage,
             @Valid @RequestBody(required = false) List<FilterTask> filters, BindingResult bindingResult){
@@ -75,14 +76,7 @@ public class TaskController {
         }
 
         Page<Task> page = tasksService.getTasks(user.getId(), filters, numberOfPage, itemsPerPage);
-        return Map.of(
-                "currentPage", page.getNumber(),
-                "numberOfElements", page.getNumberOfElements(),
-                "pageSize", page.getSize(),
-                "totalPages", page.getTotalPages(),
-                "totalElements", page.getTotalElements(),
-                "content", page.stream().map(this::convertToTaskDTO).toList()
-        );
+        return convertToPageDTO(page);
     }
 
     @GetMapping("/{id}")
@@ -144,5 +138,17 @@ public class TaskController {
 
     private TaskDTO convertToTaskDTO(Task task){
         return modelMapper.map(task, TaskDTO.class);
+    }
+
+    private PageDTO<TaskDTO> convertToPageDTO(Page<Task> page){
+        PageDTO<TaskDTO> pageDTO = new PageDTO<>();
+        pageDTO.setCurrentPage(page.getNumber());
+        pageDTO.setNumberOfElements(page.getNumberOfElements());
+        pageDTO.setPageSize(page.getSize());
+        pageDTO.setTotalPages(page.getTotalPages());
+        pageDTO.setTotalElements(page.getTotalElements());
+        pageDTO.setContent(page.stream().map(this::convertToTaskDTO).toList());
+
+        return pageDTO;
     }
 }

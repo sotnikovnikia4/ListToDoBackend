@@ -222,6 +222,31 @@ class TasksServiceTest {
     }
 
     @Test
+    void testCheckUserFilter_ShouldNotThrowException() throws Exception{
+        Method method = tasksService.getClass().getDeclaredMethod("checkUserFilter", List.class);
+        method.setAccessible(true);
+
+        List<FilterTask> filters = new ArrayList<>();
+
+        assertDoesNotThrow(() -> method.invoke(tasksService, filters));
+    }
+
+    @Test
+    void testCheckUserFilter_ShouldThrowException() throws Exception{
+        Method method = tasksService.getClass().getDeclaredMethod("checkUserFilter", List.class);
+        method.setAccessible(true);
+
+        List<FilterTask> filters = new ArrayList<>();
+        filters.add(
+                FilterTask.builder()
+                        .field("userId")
+                        .build()
+        );
+
+        assertThrows(Exception.class, () -> method.invoke(tasksService, filters));
+    }
+
+    @Test
     void testAddUserFilter_ShouldAddFilterToList() throws Exception{
         Method method = tasksService.getClass().getDeclaredMethod("addUserFilter", UUID.class, List.class);
         method.setAccessible(true);

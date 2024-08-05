@@ -120,11 +120,20 @@ public class TasksService {
 
     public Page<Task> getTasks(UUID userId, List<FilterTask> filters, Integer numberOfPage, Integer itemsPerPage) {
         Sort sort = getSort(filters);
+        checkUserFilter(filters);
         addUserFilter(userId, filters);
 
         Predicate predicate = converterToPredicate.apply(filters);
 
         return tasksRepository.findAll(predicate, PageRequest.of(numberOfPage, itemsPerPage, sort));
+    }
+
+    private void checkUserFilter(List<FilterTask> filters){
+        for(FilterTask f : filters){
+            if(f.getField().equals("userId")){
+                throw new TaskException("You cannot add user filter :)");
+            }
+        }
     }
 
     private void addUserFilter(UUID userId, List<FilterTask> filters) {
