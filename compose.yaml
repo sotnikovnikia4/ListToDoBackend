@@ -1,9 +1,51 @@
 services:
+  openjdk:
+    build: .
+    container_name: application
+    ports:
+      - 8081:8081
+    depends_on:
+      - postgres
+      - mongo
+    environment:
+      - 'SPRING_DATASOURCE_URL=jdbc:postgresql://users-db:5432/users_db'
+      - 'SPRING_DATASOURCE_USERNAME=postgres'
+      - 'SPRING_DATASOURCE_PASSWORD=postgres'
+      - 'SPRING_DATA_MONGODB_URI=mongodb://root:12345@tasks-db:27017/list_to_do_tasks?authSource=admin'
+      - 'SPRING_DATA_MONGODB_DATABASE=list_to_do_tasks'
+      - 'SPRING_DATA_MONGODB_USERNAME=root'
+      - 'SPRING_DATA_MONGODB_PASSWORD=12345'
+      - 'SPRING_DATA_MONGODB_HOST=tasks-db'
+      - 'SPRING_DATA_MONGODB_PORT=27017'
+
+
   postgres:
     image: 'postgres:latest'
     environment:
-      - 'POSTGRES_DB=mydatabase'
-      - 'POSTGRES_PASSWORD=secret'
-      - 'POSTGRES_USER=myuser'
+      - 'POSTGRES_DB=users_db'
+      - 'POSTGRES_PASSWORD=postgres'
+      - 'POSTGRES_USER=postgres'
     ports:
       - '5432'
+    container_name: users-db
+    volumes:
+      - user-data:/var/lib/postgresql/data
+      - ./postgres/init.sql:/docker-entrypoint-initdb.d/init.sql
+
+  mongo:
+    image: mongo
+    restart: always
+    ports:
+      - '27017'
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: 12345
+    volumes:
+      - tasks-data:/mongodb/data/data
+    container_name: tasks-db
+
+volumes:
+  user-data: null
+  tasks-data: null
+
+

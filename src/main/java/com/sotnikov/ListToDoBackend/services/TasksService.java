@@ -9,7 +9,6 @@ import com.sotnikov.ListToDoBackend.models.User;
 import com.sotnikov.ListToDoBackend.repotitories.TasksRepository;
 import com.sotnikov.ListToDoBackend.util.filtertaskconverter.FilterTaskToPredicateConverter;
 import com.sotnikov.ListToDoBackend.util.filtertaskconverter.OneTypeConverter;
-import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import org.bson.types.ObjectId;
 import org.springframework.data.domain.Page;
