@@ -41,11 +41,11 @@ services:
       MONGO_INITDB_ROOT_USERNAME: root
       MONGO_INITDB_ROOT_PASSWORD: 12345
     volumes:
-      - tasks-data:/mongodb/data/data
+      - mongodb:/data/db
+      - mongodb_config:/data/configdb
     container_name: tasks-db
 
 volumes:
-  user-data: null
-  tasks-data: null
-
-
+  user-data:
+  mongodb:
+  mongodb_config:
