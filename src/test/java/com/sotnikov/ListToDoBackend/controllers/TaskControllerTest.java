@@ -127,7 +127,7 @@ class TaskControllerTest {
                 e -> new PageImpl<>(tasks, PageRequest.of(e.getArgument(2), e.getArgument(3)), tasks.size())
         );
 
-        ResultActions resultActions = mockMvc.perform(get("/tasks/get-all/pageable").params(
+        ResultActions resultActions = mockMvc.perform(post("/tasks/get-all/pageable").params(
                 new MultiValueMapAdapter<>(Map.of(
                         "numberOfPage", List.of("0"),
                         "itemsPerPage", List.of("5")
@@ -204,7 +204,7 @@ class TaskControllerTest {
         ResultActions resultActions = mockMvc.perform(delete("/tasks/" + taskDTO.getId() + "/delete")
                 .contentType(MediaType.APPLICATION_JSON));
 
-        resultActions.andExpect(status().isOk());
+        resultActions.andExpect(status().isNoContent());
     }
 
     @Test
@@ -216,7 +216,7 @@ class TaskControllerTest {
                 .param("completed", "true")
         );
 
-        resultActions.andExpect(status().isOk());
+        resultActions.andExpect(status().isNoContent());
     }
 
 //    @Test

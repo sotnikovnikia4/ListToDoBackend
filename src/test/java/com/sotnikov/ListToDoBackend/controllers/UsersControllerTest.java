@@ -98,6 +98,6 @@ class UsersControllerTest {
         ResultActions resultActions = mockMvc.perform(MockMvcRequestBuilders.delete("/users/delete")
                 .contentType(MediaType.APPLICATION_JSON));
 
-        resultActions.andExpect(MockMvcResultMatchers.status().isOk());
+        resultActions.andExpect(MockMvcResultMatchers.status().isNoContent());
     }
 }

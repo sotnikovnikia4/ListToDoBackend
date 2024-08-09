@@ -25,7 +25,6 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 @RestController
 @RequestMapping("/tasks")
@@ -59,12 +58,25 @@ public class TaskController {
         return tasks.stream().map(this::convertToTaskDTO).toList();
     }
 
-    @GetMapping("/get-all/pageable")
+    @PostMapping("/get-all/pageable")
     @ResponseStatus(HttpStatus.OK)
     public PageDTO<TaskDTO> getAllTasksWithPagination(
             @RequestParam(name = "numberOfPage") Integer numberOfPage,
             @RequestParam(name = "itemsPerPage") Integer itemsPerPage,
-            @Valid @RequestBody(required = false) List<FilterTask> filters, BindingResult bindingResult){
+
+            @io.swagger.v3.oas.annotations.parameters.RequestBody(
+                    required = false,
+                    description = "Next operators are allowed: <br/>- CONTAINS, " +
+                            "<br/>- EQUALS" +
+                            "<br/>- LESS_THAN" +
+                            "<br/>- GREATER_THAN" +
+                            "<br/>- CONTAINS_IGNORE_CASE" +
+                            "<br/>- EQUALS_IGNORE_CASE" +
+                            "<br/>- NONE(if you want only sort with current field)<br/><br/>" +
+                            "You do not have to put user filter into list, if you do this, you will get an error message."
+            )
+            @Valid @RequestBody(required = false) List<FilterTask> filters, BindingResult bindingResult
+    ){
         User user = userDetailsHolder.getUserFromSecurityContext();
 
         if(filters == null){
@@ -116,13 +128,13 @@ public class TaskController {
     }
 
     @DeleteMapping("/{id}/delete")
-    @ResponseStatus(HttpStatus.OK)
+    @ResponseStatus(HttpStatus.NO_CONTENT)
     public void deleteTask(@PathVariable(name = "id") String id){
         tasksService.delete(id, userDetailsHolder.getUserFromSecurityContext());
     }
 
     @PutMapping("/{id}/set-completed")
-    @ResponseStatus(HttpStatus.OK)
+    @ResponseStatus(HttpStatus.NO_CONTENT)
     public void setCompleted(@PathVariable(name = "id") String id,
                              @RequestParam(name = "completed") Boolean completed){
         tasksService.setCompleted(id, completed, userDetailsHolder.getUserFromSecurityContext());

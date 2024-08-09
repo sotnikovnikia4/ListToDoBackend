@@ -54,7 +54,7 @@ public class UsersController {
     }
 
     @DeleteMapping("/delete")
-    @ResponseStatus(HttpStatus.OK)
+    @ResponseStatus(HttpStatus.NO_CONTENT)
     public void delete(){
         User currentUser = userDetailsHolder.getUserFromSecurityContext();
 
