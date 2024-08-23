@@ -13,18 +13,18 @@ This project is backend api of my project "List to do". Front end part will be w
 
 ## Stack
 
-- Java
-- Spring Framework (Boot, Security, Web, JPA)
-- JUnit 5 and Mockito for testing
-- PostgreSQL
-- MongoDB
-- Docker for assembling databases and API together
-- Maven for assembling the java project
+- **Java**
+- **Spring Framework** (Boot, Security, Web, JPA)
+- **JUnit 5** and **Mockito** for testing
+- **PostgreSQL**
+- **MongoDB**
+- **Docker** for assembling databases and API together
+- **Maven** for assembling the java project
 
 ## How to run the project?
 
 1. Download [**Docker**](https://www.docker.com/products/docker-desktop/)
-2. Open *cmd* in project's folder
+2. Open **cmd** in project's folder
 3. Enter command ```mvnw.cmd clean compile package``` for Windows (```mvnw clean compile package``` for macOS)
 4. Enter command ```docker-compose build```
 5. Enter command ```docker-compose up -d```
