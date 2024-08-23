@@ -19,6 +19,7 @@ This project is backend api of my project "List to do". Front end part will be w
 - PostgreSQL
 - MongoDB
 - Docker for assembling databases and API together
+- Maven for assembling the java project
 
 ## How to run the project?
 
