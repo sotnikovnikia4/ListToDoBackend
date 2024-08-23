@@ -24,7 +24,7 @@ This project is backend api of my project "List to do". Front end part will be w
 
 1. Download [**Docker**](https://www.docker.com/products/docker-desktop/)
 2. Open *cmd* in project's folder
-3. Enter command ```mvnw.cmd clean compile package```
+3. Enter command ```mvnw.cmd clean compile package``` for Windows (```mvnw clean compile package``` for macOS)
 4. Enter command ```docker-compose build```
 5. Enter command ```docker-compose up -d```
 6. Go to ```localhost:8081/api-docs/swagger``` for documentation
